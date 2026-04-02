@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 1: Introduction to Python Machine Learning</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .presentation-wrapper {
+            width: 100%;
+            max-width: 1600px;
+            aspect-ratio: 16/9;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            padding: 60px 80px;
+            box-sizing: border-box;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            animation: slideIn 0.6s ease-out;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .slide-header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 4px solid #667eea;
+            padding-bottom: 20px;
+        }
+
+        .slide-header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .slide-header h2 {
+            color: #34495e;
+            font-size: 1.8em;
+            font-weight: 400;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            width: 100%;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .content-box {
+            background: white;
+            border-left: 6px solid #667eea;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .content-box:hover {
+            transform: translateY(-5px);
+        }
+
+        .en-text {
+            color: #2c3e50;
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .ru-text {
+            color: #7f8c8d;
+            font-size: 1em;
+            line-height: 1.6;
+            font-style: italic;
+            border-top: 1px dashed #bdc3c7;
+            padding-top: 10px;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #667eea20 0%, #764ba220 100%);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .nav-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .slide-indicator {
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .download-btn {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+            z-index: 100;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(39, 174, 96, 0.6);
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 10px;
+            list-style-type: none;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .slide {
+                padding: 40px 50px;
+            }
+            
+            .slide-header h1 {
+                font-size: 2em;
+            }
+            
+            .slide-header h2 {
+                font-size: 1.4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-wrapper">
+        <button class="download-btn" onclick="downloadPresentation()">📥 Download HTML</button>
+        
+        <!-- Slide 1: Title -->
+        <div class="slide active" id="slide1">
+            <div class="slide-header">
+                <h1>Chapter 1: An Introduction to Python Machine Learning</h1>
+                <h2>Глава 1: Введение в машинное обучение на Python</h2>
+            </div>
+            <div class="content-grid">
+                <div class="content-box full-width">
+                    <p class="en-text">📚 Based on the provided educational material about Machine Learning fundamentals</p>
+                    <p class="ru-text">📚 Основано на предоставленном учебном материале об основах машинного обучения</p>
+                </div>
+                <div class="content-box">
+                    <p class="en-text">🎯 Learn the basics of ML algorithms and their applications</p>
+                    <p class="ru-text">🎯 Изучите основы алгоритмов МО и их применения</p>
+                </div>
+                <div class="content-box">
+                    <p class="en-text">🌐 Bilingual presentation for better understanding</p>
+                    <p class="ru-text">🌐 Двуязычная презентация для лучшего понимания</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: What is Machine Learning? -->
+        <div class="slide" id="slide2">
+            <div class="slide-header">
+                <h1>What is Machine Learning?</h1>
+                <h2>Что такое машинное обучение?</h2>
+            </div>
+            <div class="content-grid">
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">Definition:</span> Machine learning is both the application and the science of algorithms that can make some sense out of data.</p>
+                    <p class="ru-text"><span class="highlight">Определение:</span> Машинное обучение — это одновременно приложение и наука об алгоритмах, которые могут осмысливать данные.</p>
+                </div>
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">Purpose:</span> It allows data to be used to create knowledge and predict future events.</p>
+                    <p class="ru-text"><span class="highlight">Цель:</span> Оно позволяет использовать данные для создания знаний и предсказания будущих событий.</p>
+                </div>
+                <div class="content-box full-width">
+                    <p class="en-text">💡 Machine learning helps computers automate, anticipate and evolve, but still needs human beings to set parameters and train the machine.</p>
+                    <p class="ru-text">💡 Машинное обучение помогает компьютерам автоматизировать, предвидеть и эволюционировать, но всё ещё нуждается в людях для настройки параметров и обучения машины.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: The Role of Algorithms -->
+        <div class="slide" id="slide3">
+            <div class="slide-header">
+                <h1>The Role of Algorithms</h1>
+                <h2>Роль алгоритмов</h2>
+            </div>
+            <div class="content-grid">
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">Algorithm:</span> A method of analyzing data in a way that makes it possible for machines to analyze and process data.</p>
+                    <p class="ru-text"><span class="highlight">Алгоритм:</span> Метод анализа данных, который позволяет машинам анализировать и обрабатывать информацию.</p>
+                </div>
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">Capabilities:</span> Computers can understand different concepts, make choices, and predict possibilities for the future.</p>
+                    <p class="ru-text"><span class="highlight">Возможности:</span> Компьютеры могут понимать концепции, делать выбор и предсказывать возможности.</p>
+                </div>
+                <div class="content-box full-width">
+                    <p class="en-text">⚠️ <span class="highlight">Important:</span> Without algorithms, machines cannot learn. They enable computers to turn data into knowledge for data-driven decisions.</p>
+                    <p class="ru-text">⚠️ <span class="highlight">Важно:</span> Без алгоритмов машины не могут учиться. Они позволяют компьютерам превращать данные в знания для принятия решений.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Three Types of ML -->
+        <div class="slide" id="slide4">
+            <div class="slide-header">
+                <h1>Three Types of Machine Learning</h1>
+                <h2>Три типа машинного обучения</h2>
+            </div>
+            <div class="content-grid">
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">1. Supervised Learning</span></p>
+                    <p class="ru-text"><span class="highlight">1. Обучение с учителем</span></p>
+                    <ul>
+                        <li class="en-text">Requires labeled training data</li>
+                        <li class="ru-text">Требует размеченных обучающих данных</li>
+                    </ul>
+                </div>
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">2. Unsupervised Learning</span></p>
+                    <p class="ru-text"><span class="highlight">2. Обучение без учителя</span></p>
+                    <ul>
+                        <li class="en-text">Uses unlabeled data with unknown structure</li>
+                        <li class="ru-text">Использует неразмеченные данные</li>
+                    </ul>
+                </div>
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">3. Reinforcement Learning</span></p>
+                    <p class="ru-text"><span class="highlight">3. Обучение с подкреплением</span></p>
+                    <ul>
+                        <li class="en-text">Agent improves through environment interaction</li>
+                        <li class="ru-text">Агент улучшается через взаимодействие со средой</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Supervised Learning -->
+        <div class="slide" id="slide5">
+            <div class="slide-header">
+                <h1>Supervised Learning</h1>
+                <h2>Обучение с учителем</h2>
+            </div>
+            <div class="content-grid">
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">How it works:</span> Requires a detailed input of related data over a period of time. Once all information is available, it classifies new data.</p>
+                    <p class="ru-text"><span class="highlight">Как работает:</span> Требует подробного ввода связанных данных за период времени. После получения всей информации классифицирует новые данные.</p>
+                </div>
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">Process:</span> The computer performs calculations, comparisons, and analysis before making a decision.</p>
+                    <p class="ru-text"><span class="highlight">Процесс:</span> Компьютер выполняет вычисления, сравнения и анализ перед принятием решения.</p>
+                </div>
+                <div class="content-box full-width">
+                    <p class="en-text">👤 <span class="highlight">Human Input:</span> Requires human input to ensure the computer has the right data to process. We already know the answer we want when the model is being trained.</p>
+                    <p class="ru-text">👤 <span class="highlight">Участие человека:</span> Требует участия человека для обеспечения правильности данных. Мы уже знаем желаемый ответ при обучении модели.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Unsupervised Learning -->
+        <div class="slide" id="slide6">
+            <div class="slide-header">
+                <h1>Unsupervised Learning</h1>
+                <h2>Обучение без учителя</h2>
+            </div>
+            <div class="content-grid">
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">Challenge:</span> The computer does not have all the information to make a decision. Some factors may be missing.</p>
+                    <p class="ru-text"><span class="highlight">Сложность:</span> У компьютера нет всей информации для принятия решения. Некоторые факторы могут отсутствовать.</p>
+                </div>
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">Solution:</span> Must be equipped with tools to find missing elements without human help. More complex than supervised algorithms.</p>
+                    <p class="ru-text"><span class="highlight">Решение:</span> Должно быть оснащено инструментами для поиска недостающих элементов без помощи человека. Сложнее алгоритмов с учителем.</p>
+                </div>
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">Techniques:</span> Clustering and Dimensionality Reduction</p>
+                    <p class="ru-text"><span class="highlight">Техники:</span> Кластеризация и уменьшение размерности</p>
+                </div>
+                <div class="content-box full-width">
+                    <p class="en-text">🔍 <span class="highlight">Clustering:</span> Organizes data into subgroups or clusters based on similarity. Often termed as "unsupervised classification".</p>
+                    <p class="ru-text">🔍 <span class="highlight">Кластеризация:</span> Организует данные в подгруппы или кластеры на основе сходства. Часто называется «классификацией без учителя».</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Reinforcement Learning -->
+        <div class="slide" id="slide7">
+            <div class="slide-header">
+                <h1>Reinforcement Learning</h1>
+                <h2>Обучение с подкреплением</h2>
+            </div>
+            <div class="content-grid">
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">Goal:</span> Develop an agent or system that can improve its performance based on interaction with its environment.</p>
+                    <p class="ru-text"><span class="highlight">Цель:</span> Разработать агента или систему, которая может улучшить свою производительность на основе взаимодействия со средой.</p>
+                </div>
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">Reward System:</span> Uses a reward-signal (positive or negative) defined by achieving a specific goal.</p>
+                    <p class="ru-text"><span class="highlight">Система вознаграждения:</span> Использует сигнал вознаграждения (положительный или отрицательный), определяемый достижением цели.</p>
+                </div>
+                <div class="content-box full-width">
+                    <p class="en-text">🎮 <span class="highlight">How it differs:</span> With supervised learning, we know the answer. With Reinforcement Learning, we provide a reward measured by specific actions performed by the agent.</p>
+                    <p class="ru-text">🎮 <span class="highlight">Отличие:</span> При обучении с учителем мы знаем ответ. При обучении с подкреплением мы предоставляем вознаграждение за конкретные действия агента.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Data Preprocessing -->
+        <div class="slide" id="slide8">
+            <div class="slide-header">
+                <h1>Data Preprocessing & Training</h1>
+                <h2>Предварительная обработка и обучение</h2>
+            </div>
+            <div class="content-grid">
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">Preprocessing:</span> Getting data into shape. Raw data is rarely in the right format for learning algorithms.</p>
+                    <p class="ru-text"><span class="highlight">Предобработка:</span> Приведение данных в форму. Сырые данные редко в правильном формате для алгоритмов.</p>
+                </div>
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">Feature Scaling:</span> Features need identical scales. Achieved by transforming to a range or using standard distribution.</p>
+                    <p class="ru-text"><span class="highlight">Масштабирование:</span> Признаки нуждаются в одинаковых масштабах. Достигается преобразованием к диапазону или стандартному распределению.</p>
+                </div>
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">Dataset Split:</span> Divide into Training and Test sets. Training trains the model, test evaluates it.</p>
+                    <p class="ru-text"><span class="highlight">Разделение:</span> Разделите на обучающий и тестовый наборы. Обучающий обучает модель, тестовый оценивает.</p>
+                </div>
+                <div class="content-box full-width">
+                    <p class="en-text">⚙️ <span class="highlight">Hyperparameter Optimization:</span> Fine-tune model performance. Hyperparameters are dials we can turn to improve the model (cannot be learned from dataset).</p>
+                    <p class="ru-text">⚙️ <span class="highlight">Оптимизация гиперпараметров:</span> Настройка производительности модели. Гиперпараметры — это регуляторы для улучшения модели (не обучаются из данных).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Dimensionality Reduction -->
+        <div class="slide" id="slide9">
+            <div class="slide-header">
+                <h1>Dimensionality Reduction</h1>
+                <h2>Уменьшение размерности</h2>
+            </div>
+            <div class="content-grid">
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">Purpose:</span> Remove noise from data that can cause degradation in predictive performance.</p>
+                    <p class="ru-text"><span class="highlight">Цель:</span> Удалить шум из данных, который может ухудшить прогнозную производительность.</p>
+                </div>
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">Benefits:</span> Compress data to fit smaller subspace while keeping relevant information. Reduces storage space and makes algorithms faster.</p>
+                    <p class="ru-text"><span class="highlight">Преимущества:</span> Сжатие данных в меньшее подпространство с сохранением информации. Уменьшает место и ускоряет алгоритмы.</p>
+                </div>
+                <div class="content-box full-width">
+                    <p class="en-text">📊 <span class="highlight">Visualization:</span> Project high-dimensional feature set onto 1, 2, or 3D spaces. Allows viewing through 2D or 3D histograms or scatter plots.</p>
+                    <p class="ru-text">📊 <span class="highlight">Визуализация:</span> Проекция многомерного набора признаков на 1, 2 или 3D пространства. Позволяет просматривать через 2D или 3D гистограммы.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Model Training & Evaluation -->
+        <div class="slide" id="slide10">
+            <div class="slide-header">
+                <h1>Training and Choosing Models</h1>
+                <h2>Обучение и выбор моделей</h2>
+            </div>
+            <div class="content-grid">
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">Model Selection:</span> Several algorithms are compared to select the best model. Common metric: classification accuracy.</p>
+                    <p class="ru-text"><span class="highlight">Выбор модели:</span> Сравниваются несколько алгоритмов для выбора лучшей модели. Общая метрика: точность классификации.</p>
+                </div>
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">Cross-Validation:</span> Dataset split into training and validation subsets to estimate generalization performance.</p>
+                    <p class="ru-text"><span class="highlight">Кросс-валидация:</span> Набор данных разделяется на обучающую и проверочную подмножества для оценки обобщающей способности.</p>
+                </div>
+                <div class="content-box full-width">
+                    <p class="en-text">⚠️ <span class="highlight">Important Warning:</span> Parameters for procedures (dimensionality reduction, feature scaling) must be obtained ONLY from training dataset, then applied to test dataset. Otherwise, test data may produce overly-optimistic performance measurement!</p>
+                    <p class="ru-text">⚠️ <span class="highlight">Важное предупреждение:</span> Параметры для процедур (уменьшение размерности, масштабирование) должны получаться ТОЛЬКО из обучающего набора, затем применяться к тестовому. Иначе тестовые данные могут дать излишне оптимистичную оценку!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Conclusion -->
+        <div class="slide" id="slide11">
+            <div class="slide-header">
+                <h1>Conclusion</h1>
+                <h2>Заключение</h2>
+            </div>
+            <div class="content-grid">
+                <div class="content-box full-width">
+                    <p class="en-text">🌟 <span class="highlight">Machine Learning Impact:</span> Helps computers automate, anticipate and evolve. It is a peak time to start truly understanding machine learning.</p>
+                    <p class="ru-text">🌟 <span class="highlight">Влияние МО:</span> Помогает компьютерам автоматизировать, предвидеть и эволюционировать. Сейчас лучшее время, чтобы начать понимать машинное обучение.</p>
+                </div>
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">Data to Knowledge:</span> Algorithms turn data into knowledge for data-driven decisions.</p>
+                    <p class="ru-text"><span class="highlight">Данные в знания:</span> Алгоритмы превращают данные в знания для принятия решений на основе данных.</p>
+                </div>
+                <div class="content-box">
+                    <p class="en-text"><span class="highlight">Future:</span> Machine learning will radically change the world. The best question is not what machines will do, but what will we do?</p>
+                    <p class="ru-text"><span class="highlight">Будущее:</span> Машинное обучение радикально изменит мир. Лучший вопрос не что будут делать машины, а что будем делать мы?</p>
+                </div>
+                <div class="content-box full-width">
+                    <p class="en-text">📖 <span class="highlight">Practice:</span> It is important to practice as much as you can to improve your knowledge of machine learning. Complete projects to enhance understanding!</p>
+                    <p class="ru-text">📖 <span class="highlight">Практика:</span> Важно практиковаться как можно больше для улучшения знаний о машинном обучении. Выполняйте проекты для углубления понимания!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-bar" id="progressBar"></div>
+        
+        <div class="controls">
+            <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">◀ Previous</button>
+            <span class="slide-indicator" id="slideIndicator">1 / 11</span>
+            <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next ▶</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideIndicator = document.getElementById('slideIndicator');
+        const progressBar = document.getElementById('progressBar');
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+            slideIndicator.textContent = `${currentSlide + 1} / ${totalSlides}`;
+            progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+        }
+
+        function changeSlide(direction) {
+            currentSlide += direction;
+            if (currentSlide < 0) currentSlide = 0;
+            if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+            updateSlide();
+        }
+
+        function downloadPresentation() {
+            const htmlContent = document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Chapter1_Machine_Learning_Presentation.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight' || event.key === ' ') {
+                changeSlide(1);
+            } else if (event.key === 'ArrowLeft') {
+                changeSlide(-1);
+            }
+        });
+
+        // Touch navigation for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', function(event) {
+            touchStartX = event.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', function(event) {
+            touchEndX = event.changedTouches[0].screenX;
+            if (touchStartX - touchEndX > 50) {
+                changeSlide(1);
+            } else if (touchEndX - touchStartX > 50) {
+                changeSlide(-1);
+            }
+        });
+
+        // Initialize
+        updateSlide();
+    </script>
+</body>
+</html>

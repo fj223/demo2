@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Fundamentals - Chapter 1 | 人工智能基础 - 第1章</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --text-color: #333;
+            --bg-color: #f4f4f4;
+            --slide-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .presentation-container {
+            width: 95%;
+            max-width: 1200px;
+            height: 90vh;
+            background-color: var(--slide-bg);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .language-bar {
+            background: var(--primary-color);
+            padding: 8px 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .lang-btn.active {
+            background: #2980b9;
+            font-weight: bold;
+        }
+
+        .slide {
+            flex: 1;
+            padding: 30px 50px;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            animation: fadeIn 0.5s ease-in-out;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 { color: var(--primary-color); font-size: 2.2em; margin-bottom: 0.5em; border-bottom: 3px solid var(--accent-color); padding-bottom: 10px; }
+        h2 { color: var(--accent-color); font-size: 1.6em; margin-bottom: 15px; }
+        h3 { color: var(--primary-color); font-size: 1.3em; margin-top: 15px; }
+        p, li { font-size: 1.1em; line-height: 1.5; margin-bottom: 10px; }
+        ul { padding-left: 20px; }
+
+        .content-ru, .content-en, .content-zh { display: none; }
+        .content-ru.active, .content-en.active, .content-zh.active { display: block; }
+
+        .highlight { background: #e8f4fc; padding: 2px 5px; border-radius: 3px; font-weight: bold; }
+        
+        .controls {
+            height: 50px;
+            background: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            color: white;
+        }
+
+        button.nav-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button.nav-btn:hover { background: #2980b9; }
+        button.nav-btn:disabled { background: #95a5a6; cursor: not-allowed; }
+
+        .progress-bar { height: 4px; background: #ddd; width: 100%; }
+        .progress-fill { height: 100%; background: var(--accent-color); width: 0%; transition: width 0.3s; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .box { border: 1px solid #ddd; padding: 12px; border-radius: 5px; background: #fafafa; }
+
+        @media (max-width: 768px) {
+            .slide { padding: 15px; }
+            h1 { font-size: 1.6em; }
+            h2 { font-size: 1.3em; }
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="presentation-container">
+    <div class="language-bar">
+        <button class="lang-btn active" onclick="setLanguage('ru')">RU</button>
+        <button class="lang-btn" onclick="setLanguage('en')">EN</button>
+        <button class="lang-btn" onclick="setLanguage('zh')">中文</button>
+    </div>
+    
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+    <!-- Slide 1: Title -->
+    <div class="slide active">
+        <div class="content-ru active">
+            <h1>Основы искусственного интеллекта</h1>
+            <h2>Глава 1. Искусственный интеллект</h2>
+            <p><strong>Авторы:</strong> Е. В. Боровская, Н. А. Давыдова</p>
+            <p>Учебное пособие, 4-е издание, 2020</p>
+        </div>
+        <div class="content-en">
+            <h1>Fundamentals of Artificial Intelligence</h1>
+            <h2>Chapter 1. Artificial Intelligence</h2>
+            <p><strong>Authors:</strong> E. V. Borovskaya, N. A. Davydova</p>
+            <p>Textbook, 4th edition, 2020</p>
+        </div>
+        <div class="content-zh">
+            <h1>人工智能基础</h1>
+            <h2>第1章 人工智能</h2>
+            <p><strong>作者：</strong>Е. В. Боровская, Н. А. Давыдова</p>
+            <p>教材，第4版，2020年</p>
+        </div>
+    </div>
+
+    <!-- Slide 2: Concept & History -->
+    <div class="slide">
+        <div class="content-ru active">
+            <h2>1.1. Понятие и история ИИ</h2>
+            <p><strong>Система ИИ</strong> — программная система, имитирующая процесс мышления человека.</p>
+            <p><strong>Ключевые вехи:</strong></p>
+            <ul>
+                <li><span class="highlight">XIII в.</span> Раймонд Луллий (механическое устройство)</li>
+                <li><span class="highlight">1940-е</span> Норберт Винер (Кибернетика)</li>
+                <li><span class="highlight">1956</span> Термин «ИИ» (Дартмутский колледж, США)</li>
+                <li><span class="highlight">1970-е</span> Экспертные системы (Mycin, Dendral)</li>
+            </ul>
+        </div>
+        <div class="content-en">
+            <h2>1.1. Concept and History of AI</h2>
+            <p><strong>AI System</strong> — a software system that simulates human thinking processes.</p>
+            <p><strong>Key milestones:</strong></p>
+            <ul>
+                <li><span class="highlight">13th century</span> Ramon Llull (mechanical device)</li>
+                <li><span class="highlight">1940s</span> Norbert Wiener (Cybernetics)</li>
+                <li><span class="highlight">1956</span> Term "AI" coined (Dartmouth College, USA)</li>
+                <li><span class="highlight">1970s</span> Expert systems (Mycin, Dendral)</li>
+            </ul>
+        </div>
+        <div class="content-zh">
+            <h2>1.1 人工智能的概念与历史</h2>
+            <p><strong>人工智能系统</strong> — 模拟人类思维过程的软件系统。</p>
+            <p><strong>关键里程碑：</strong></p>
+            <ul>
+                <li><span class="highlight">13世纪</span> 雷蒙·卢利（机械装置）</li>
+                <li><span class="highlight">1940年代</span> 诺伯特·维纳（控制论）</li>
+                <li><span class="highlight">1956年</span> "人工智能"术语提出（美国达特茅斯学院）</li>
+                <li><span class="highlight">1970年代</span> 专家系统（Mycin, Dendral）</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Slide 3: Two Directions -->
+    <div class="slide">
+        <div class="content-ru active">
+            <h2>Два направления ИИ</h2>
+            <div class="grid-2">
+                <div class="box">
+                    <h3>Нейрокибернетика</h3>
+                    <p>«Единственный объект, способный мыслить — мозг».</p>
+                    <ul>
+                        <li>Моделирование структуры мозга</li>
+                        <li>Нейроны и нейронные сети</li>
+                        <li>Аппаратная реализация (нейрочипы)</li>
+                    </ul>
+                </div>
+                <div class="box">
+                    <h3>Кибернетика «чёрного ящика»</h3>
+                    <p>«Не важно устройство, важен результат».</p>
+                    <ul>
+                        <li>Поиск алгоритмов решения задач</li>
+                        <li>Логический вывод, эвристики</li>
+                        <li>Языки: Prolog, Lisp</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="content-en">
+            <h2>Two Directions of AI</h2>
+            <div class="grid-2">
+                <div class="box">
+                    <h3>Neurocybernetics</h3>
+                    <p>"The only object capable of thinking is the brain."</p>
+                    <ul>
+                        <li>Modeling brain structure</li>
+                        <li>Neurons and neural networks</li>
+                        <li>Hardware implementation (neurochips)</li>
+                    </ul>
+                </div>
+                <div class="box">
+                    <h3>"Black Box" Cybernetics</h3>
+                    <p>"The device doesn't matter, the result does."</p>
+                    <ul>
+                        <li>Searching for problem-solving algorithms</li>
+                        <li>Logical inference, heuristics</li>
+                        <li>Languages: Prolog, Lisp</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="content-zh">
+            <h2>人工智能的两个方向</h2>
+            <div class="grid-2">
+                <div class="box">
+                    <h3>神经控制论</h3>
+                    <p>"唯一能够思考的对象是大脑。"</p>
+                    <ul>
+                        <li>模拟大脑结构</li>
+                        <li>神经元与神经网络</li>
+                        <li>硬件实现（神经芯片）</li>
+                    </ul>
+                </div>
+                <div class="box">
+                    <h3>"黑箱"控制论</h3>
+                    <p>"装置不重要，结果才重要。"</p>
+                    <ul>
+                        <li>寻找问题求解算法</li>
+                        <li>逻辑推理，启发式方法</li>
+                        <li>语言：Prolog, Lisp</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: AI in Russia -->
+    <div class="slide">
+        <div class="content-ru active">
+            <h2>1.1.2. Искусственный интеллект в России</h2>
+            <ul>
+                <li><span class="highlight">1954</span> Семинар «Автоматы и мышление» в МГУ (А. А. Ляпунов)</li>
+                <li>Программа АЛПЕВ ЛОМИ: автоматическое доказательство теорем</li>
+                <li>Алгоритм «Кора»: М. М. Бонгард (распознавание образов)</li>
+                <li><span class="highlight">1974</span> Научный совет по проблеме «ИИ» (Д. А. Поспелов)</li>
+                <li><span class="highlight">1988</span> Ассоциация искусственного интеллекта (АИИ)</li>
+            </ul>
+        </div>
+        <div class="content-en">
+            <h2>1.1.2. Artificial Intelligence in Russia</h2>
+            <ul>
+                <li><span class="highlight">1954</span> Seminar "Automata and Thinking" at MSU (A. A. Lyapunov)</li>
+                <li>ALPEV LOMI program: automated theorem proving</li>
+                <li>"Kora" algorithm: M. M. Bongard (pattern recognition)</li>
+                <li><span class="highlight">1974</span> Scientific Council on "AI" (D. A. Pospelov)</li>
+                <li><span class="highlight">1988</span> Association for Artificial Intelligence (AAI)</li>
+            </ul>
+        </div>
+        <div class="content-zh">
+            <h2>1.1.2 俄罗斯的人工智能</h2>
+            <ul>
+                <li><span class="highlight">1954年</span> 莫斯科大学"自动机与思维"研讨会（А. А. Ляпунов）</li>
+                <li>АЛПЕВ ЛОМИ程序：自动定理证明</li>
+                <li>"Кора"算法：М. М. Бонгард（模式识别）</li>
+                <li><span class="highlight">1974年</span> "人工智能"问题科学委员会（Д. А. Поспелов）</li>
+                <li><span class="highlight">1988年</span> 人工智能协会（АИИ）</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Slide 5: Functional Structure -->
+    <div class="slide">
+        <div class="content-ru active">
+            <h2>1.1.3. Функциональная структура системы ИИ</h2>
+            <p>Система состоит из трёх комплексов:</p>
+            <ol>
+                <li><strong>Исполнительная система (ИС):</strong> выполняет программы, решает задачи</li>
+                <li><strong>Интеллектуальный интерфейс:</strong> адаптация под пользователя, общение на естественном языке</li>
+                <li><strong>База знаний (БЗ):</strong> центральное звено. Хранит знания о проблемной среде</li>
+            </ol>
+        </div>
+        <div class="content-en">
+            <h2>1.1.3. Functional Structure of AI System</h2>
+            <p>The system consists of three components:</p>
+            <ol>
+                <li><strong>Executive System (ES):</strong> executes programs, solves problems</li>
+                <li><strong>Intelligent Interface:</strong> user adaptation, natural language communication</li>
+                <li><strong>Knowledge Base (KB):</strong> central component. Stores knowledge about the problem domain</li>
+            </ol>
+        </div>
+        <div class="content-zh">
+            <h2>1.1.3 人工智能系统的功能结构</h2>
+            <p>系统由三个组件构成：</p>
+            <ol>
+                <li><strong>执行系统（ES）：</strong> 执行程序，解决问题</li>
+                <li><strong>智能接口：</strong> 用户适配，自然语言交互</li>
+                <li><strong>知识库（KB）：</strong> 核心组件。存储问题领域的知识</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Slide 6: Development Directions -->
+    <div class="slide">
+        <div class="content-ru active">
+            <h2>1.2. Направления развития ИИ</h2>
+            <ul>
+                <li><strong>Представление знаний:</strong> ядро экспертных систем</li>
+                <li><strong>Игровые задачи:</strong> шахматы, шашки (лабиринтная модель + эвристики)</li>
+                <li><strong>Естественно-языковые интерфейсы:</strong> машинный перевод, анализ текста</li>
+                <li><strong>Распознавание образов:</strong> близко к машинному обучению</li>
+                <li><strong>Интеллектуальные роботы:</strong> от жёстких схем до самоорганизующихся систем</li>
+                <li><strong>Обучение и самообучение:</strong> накопление знаний на основе данных</li>
+            </ul>
+        </div>
+        <div class="content-en">
+            <h2>1.2. Directions of AI Development</h2>
+            <ul>
+                <li><strong>Knowledge Representation:</strong> core of expert systems</li>
+                <li><strong>Game Tasks:</strong> chess, checkers (maze model + heuristics)</li>
+                <li><strong>Natural Language Interfaces:</strong> machine translation, text analysis</li>
+                <li><strong>Pattern Recognition:</strong> close to machine learning</li>
+                <li><strong>Intelligent Robots:</strong> from rigid schemes to self-organizing systems</li>
+                <li><strong>Learning & Self-learning:</strong> knowledge accumulation based on data</li>
+            </ul>
+        </div>
+        <div class="content-zh">
+            <h2>1.2 人工智能的发展方向</h2>
+            <ul>
+                <li><strong>知识表示：</strong> 专家系统的核心</li>
+                <li><strong>博弈任务：</strong> 国际象棋、跳棋（迷宫模型+启发式）</li>
+                <li><strong>自然语言接口：</strong> 机器翻译、文本分析</li>
+                <li><strong>模式识别：</strong> 接近机器学习</li>
+                <li><strong>智能机器人：</strong> 从刚性方案到自组织系统</li>
+                <li><strong>学习与自学习：</strong> 基于数据的知识积累</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Slide 7: Data vs Knowledge -->
+    <div class="slide">
+        <div class="content-ru active">
+            <h2>1.3. Данные и Знания</h2>
+            <div class="grid-2">
+                <div class="box">
+                    <h3>Данные</h3>
+                    <p>Отдельные факты, характеризующие объекты и процессы.</p>
+                    <p><em>Хранятся в Базах Данных (БД).</em></p>
+                </div>
+                <div class="box">
+                    <h3>Знания</h3>
+                    <p>Выявленные закономерности (принципы, связи, законы).</p>
+                    <p>Результат мыслительной деятельности.</p>
+                    <p><em>Хранятся в Базах Знаний (БЗ).</em></p>
+                </div>
+            </div>
+            <p style="margin-top:15px;"><strong>Главное отличие:</strong> Из БД можно извлечь только заложенные факты. Из БЗ можно <span class="highlight">выводить новые факты</span>, используя закономерности.</p>
+        </div>
+        <div class="content-en">
+            <h2>1.3. Data and Knowledge</h2>
+            <div class="grid-2">
+                <div class="box">
+                    <h3>Data</h3>
+                    <p>Individual facts characterizing objects and processes.</p>
+                    <p><em>Stored in Databases (DB).</em></p>
+                </div>
+                <div class="box">
+                    <h3>Knowledge</h3>
+                    <p>Identified patterns (principles, connections, laws).</p>
+                    <p>Result of cognitive activity.</p>
+                    <p><em>Stored in Knowledge Bases (KB).</em></p>
+                </div>
+            </div>
+            <p style="margin-top:15px;"><strong>Key Difference:</strong> From DB you can only retrieve stored facts. From KB you can <span class="highlight">infer new facts</span> using patterns.</p>
+        </div>
+        <div class="content-zh">
+            <h2>1.3 数据与知识</h2>
+            <div class="grid-2">
+                <div class="box">
+                    <h3>数据</h3>
+                    <p>描述对象和过程的个别事实。</p>
+                    <p><em>存储在数据库（DB）中。</em></p>
+                </div>
+                <div class="box">
+                    <h3>知识</h3>
+                    <p>发现的规律（原则、联系、法则）。</p>
+                    <p>思维活动的结果。</p>
+                    <p><em>存储在知识库（KB）中。</em></p>
+                </div>
+            </div>
+            <p style="margin-top:15px;"><strong>主要区别：</strong> 从数据库只能检索已存储的事实。从知识库可以<span class="highlight">推导新事实</span>，利用规律。</p>
+        </div>
+    </div>
+
+    <!-- Slide 8: Knowledge Models (1) -->
+    <div class="slide">
+        <div class="content-ru active">
+            <h2>1.3.2. Модели представления знаний</h2>
+            <h3>1. Семантические сети</h3>
+            <p>Ориентированный граф. Вершины — понятия, дуги — отношения («это», «имеет частью»).</p>
+            
+            <h3>2. Фреймы (М. Минский)</h3>
+            <p>Единица представления знания («рамка» ситуации).</p>
+            <ul>
+                <li>Состоит из <strong>слотов</strong> (атрибутов)</li>
+                <li>Поддерживает <strong>наследование</strong> свойств (АКО-связи)</li>
+                <li>Уровни: скелетный, прототип, экземпляр</li>
+            </ul>
+        </div>
+        <div class="content-en">
+            <h2>1.3.2. Knowledge Representation Models</h2>
+            <h3>1. Semantic Networks</h3>
+            <p>Directed graph. Nodes — concepts, edges — relations ("is-a", "has-part").</p>
+            
+            <h3>2. Frames (M. Minsky)</h3>
+            <p>Unit of knowledge representation ("frame" of a situation).</p>
+            <ul>
+                <li>Consists of <strong>slots</strong> (attributes)</li>
+                <li>Supports <strong>inheritance</strong> of properties (AKO-links)</li>
+                <li>Levels: skeletal, prototype, instance</li>
+            </ul>
+        </div>
+        <div class="content-zh">
+            <h2>1.3.2 知识表示模型</h2>
+            <h3>1. 语义网络</h3>
+            <p>有向图。节点—概念，边—关系（"是一种"，"有部分"）。</p>
+            
+            <h3>2. 框架（M. Minsky）</h3>
+            <p>知识表示单元（情境的"框架"）。</p>
+            <ul>
+                <li>由<strong>槽</strong>（属性）组成</li>
+                <li>支持属性的<strong>继承</strong>（AKO-链接）</li>
+                <li>层级：骨架、原型、实例</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Slide 9: Knowledge Models (2) -->
+    <div class="slide">
+        <div class="content-ru active">
+            <h2>Модели представления знаний (продолжение)</h2>
+            <h3>3. Формальные логические модели</h3>
+            <p>Основаны на аксиомах и правилах вывода. Формальная система M=&lt;T, P, A, B&gt;.</p>
+            
+            <h3>4. Продукционные модели</h3>
+            <p>Правила вида: <strong>«Если (условие), то (действие)».</strong></p>
+            <ul>
+                <li>База знаний = набор правил</li>
+                <li>Управляет перебором <strong>Машина вывода</strong></li>
+                <li>Вывод: прямой или обратный</li>
+            </ul>
+        </div>
+        <div class="content-en">
+            <h2>Knowledge Representation Models (cont.)</h2>
+            <h3>3. Formal Logical Models</h3>
+            <p>Based on axioms and inference rules. Formal system M=&lt;T, P, A, B&gt;.</p>
+            
+            <h3>4. Production Models</h3>
+            <p>Rules of the form: <strong>"If (condition), then (action)."</strong></p>
+            <ul>
+                <li>Knowledge Base = set of rules</li>
+                <li>Controlled by <strong>Inference Engine</strong></li>
+                <li>Inference: forward or backward chaining</li>
+            </ul>
+        </div>
+        <div class="content-zh">
+            <h2>知识表示模型（续）</h2>
+            <h3>3. 形式逻辑模型</h3>
+            <p>基于公理和推理规则。形式系统 M=&lt;T, P, A, B&gt;。</p>
+            
+            <h3>4. 产生式模型</h3>
+            <p>规则形式：<strong>"如果（条件），则（动作）"。</strong></p>
+            <ul>
+                <li>知识库 = 规则集</li>
+                <li>由<strong>推理机</strong>控制遍历</li>
+                <li>推理：正向或反向链</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Slide 10: Expert Systems -->
+    <div class="slide">
+        <div class="content-ru active">
+            <h2>1.4. Экспертные системы (ЭС)</h2>
+            <p><strong>ЭС</strong> — сложные программные комплексы, аккумулирующие знания специалистов и тиражирующие опыт для консультаций.</p>
+            <p><strong>Отличия от систем обработки данных:</strong></p>
+            <ul>
+                <li>Символьный способ представления (не числовой)</li>
+                <li>Символьный вывод</li>
+                <li>Эвристический поиск решения</li>
+                <li>Способность пополнять знания</li>
+            </ul>
+        </div>
+        <div class="content-en">
+            <h2>1.4. Expert Systems (ES)</h2>
+            <p><strong>ES</strong> — complex software systems that accumulate expert knowledge and replicate experience for consultations.</p>
+            <p><strong>Differences from data processing systems:</strong></p>
+            <ul>
+                <li>Symbolic representation (not numeric)</li>
+                <li>Symbolic inference</li>
+                <li>Heuristic problem solving</li>
+                <li>Ability to expand knowledge</li>
+            </ul>
+        </div>
+        <div class="content-zh">
+            <h2>1.4 专家系统（ES）</h2>
+            <p><strong>专家系统</strong> — 积累专家知识并复制经验用于咨询的复杂软件系统。</p>
+            <p><strong>与数据处理系统的区别：</strong></p>
+            <ul>
+                <li>符号表示（非数值）</li>
+                <li>符号推理</li>
+                <li>启发式问题求解</li>
+                <li>知识扩展能力</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Slide 11: ES Structure -->
+    <div class="slide">
+        <div class="content-ru active">
+            <h2>Структура экспертной системы</h2>
+            <p>Типичная статическая ЭС состоит из:</p>
+            <ol>
+                <li><strong>Решатель:</strong> формирует последовательность правил</li>
+                <li><strong>Рабочая память (БД):</strong> хранит текущие данные задачи</li>
+                <li><strong>База знаний (БЗ):</strong> хранит долгосрочные знания и правила</li>
+                <li><strong>Компонент приобретения знаний:</strong> наполнение системы экспертом</li>
+                <li><strong>Объяснительный компонент:</strong> поясняет, как получено решение</li>
+                <li><strong>Диалоговый компонент:</strong> интерфейс с пользователем</li>
+            </ol>
+        </div>
+        <div class="content-en">
+            <h2>Expert System Structure</h2>
+            <p>A typical static ES consists of:</p>
+            <ol>
+                <li><strong>Inference Engine:</strong> forms sequence of rules</li>
+                <li><strong>Working Memory (DB):</strong> stores current task data</li>
+                <li><strong>Knowledge Base (KB):</strong> stores long-term knowledge and rules</li>
+                <li><strong>Knowledge Acquisition:</strong> system population by expert</li>
+                <li><strong>Explanation Component:</strong> explains how solution was obtained</li>
+                <li><strong>Dialogue Component:</strong> user interface</li>
+            </ol>
+        </div>
+        <div class="content-zh">
+            <h2>专家系统结构</h2>
+            <p>典型静态专家系统由以下部分组成：</p>
+            <ol>
+                <li><strong>推理机：</strong> 形成规则序列</li>
+                <li><strong>工作内存（DB）：</strong> 存储当前任务数据</li>
+                <li><strong>知识库（KB）：</strong> 存储长期知识和规则</li>
+                <li><strong>知识获取组件：</strong> 专家填充系统</li>
+                <li><strong>解释组件：</strong> 解释如何获得解决方案</li>
+                <li><strong>对话组件：</strong> 用户界面</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Slide 12: ES Development -->
+    <div class="slide">
+        <div class="content-ru active">
+            <h2>Разработка и классификация ЭС</h2>
+            <p><strong>Участники:</strong> Эксперт, Инженер по знаниям, Программист</p>
+            <p><strong>Режимы работы:</strong> Приобретение знаний, Консультация</p>
+            <h3>Классификация по задаче:</h3>
+            <ul>
+                <li>Интерпретация, Диагностика, Мониторинг</li>
+                <li>Проектирование, Прогнозирование, Планирование, Обучение</li>
+            </ul>
+        </div>
+        <div class="content-en">
+            <h2>ES Development & Classification</h2>
+            <p><strong>Participants:</strong> Expert, Knowledge Engineer, Programmer</p>
+            <p><strong>Operating Modes:</strong> Knowledge Acquisition, Consultation</p>
+            <h3>Classification by Task:</h3>
+            <ul>
+                <li>Interpretation, Diagnosis, Monitoring</li>
+                <li>Design, Prediction, Planning, Training</li>
+            </ul>
+        </div>
+        <div class="content-zh">
+            <h2>专家系统开发与分类</h2>
+            <p><strong>参与者：</strong> 专家、知识工程师、程序员</p>
+            <p><strong>工作模式：</strong> 知识获取、咨询</p>
+            <h3>按任务分类：</h3>
+            <ul>
+                <li>解释、诊断、监控</li>
+                <li>设计、预测、规划、培训</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Slide 13: Tools -->
+    <div class="slide">
+        <div class="content-ru active">
+            <h2>Инструментальные средства построения ЭС</h2>
+            <ul>
+                <li><strong>Традиционные языки:</strong> C, C++, Pascal (высокая эффективность, но сложность)</li>
+                <li><strong>Языки ИИ:</strong> Lisp, Prolog (богатые возможности для символьных данных)</li>
+                <li><strong>Спец. инструментарий:</strong> Библиотеки над Lisp (KEE, ARTS)</li>
+                <li><strong>«Оболочки» (Shells):</strong> «Пустые» ЭС без базы знаний (например, EMYCIN)</li>
+            </ul>
+        </div>
+        <div class="content-en">
+            <h2>Tools for Building Expert Systems</h2>
+            <ul>
+                <li><strong>Traditional Languages:</strong> C, C++, Pascal (high efficiency, but complex)</li>
+                <li><strong>AI Languages:</strong> Lisp, Prolog (rich capabilities for symbolic data)</li>
+                <li><strong>Special Toolkits:</strong> Libraries over Lisp (KEE, ARTS)</li>
+                <li><strong>"Shells":</strong> "Empty" ES without knowledge base (e.g., EMYCIN)</li>
+            </ul>
+        </div>
+        <div class="content-zh">
+            <h2>构建专家系统的工具</h2>
+            <ul>
+                <li><strong>传统语言：</strong> C, C++, Pascal（高效但复杂）</li>
+                <li><strong>AI语言：</strong> Lisp, Prolog（丰富的符号数据处理能力）</li>
+                <li><strong>专用工具包：</strong> Lisp库（KEE, ARTS）</li>
+                <li><strong>"外壳"：</strong> 无知识库的"空"专家系统（如EMYCIN）</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Slide 14: Development Technology -->
+    <div class="slide">
+        <div class="content-ru active">
+            <h2>Технология разработки ЭС (6 этапов)</h2>
+            <ol>
+                <li><strong>Идентификация:</strong> осмысление задач, формирование требований</li>
+                <li><strong>Концептуализация:</strong> анализ предметной области, выявление понятий</li>
+                <li><strong>Формализация:</strong> выбор способа представления знаний</li>
+                <li><strong>Выполнение:</strong> создание прототипа ЭС, наполнение БЗ</li>
+                <li><strong>Тестирование:</strong> оценка работы системы на примерах</li>
+                <li><strong>Опытная эксплуатация:</strong> проверка пригодности для пользователя</li>
+            </ol>
+        </div>
+        <div class="content-en">
+            <h2>ES Development Technology (6 Stages)</h2>
+            <ol>
+                <li><strong>Identification:</strong> task understanding, requirements formation</li>
+                <li><strong>Conceptualization:</strong> domain analysis, concept identification</li>
+                <li><strong>Formalization:</strong> selecting knowledge representation method</li>
+                <li><strong>Implementation:</strong> ES prototype creation, KB population</li>
+                <li><strong>Testing:</strong> system evaluation on examples</li>
+                <li><strong>Experimental Operation:</strong> user suitability verification</li>
+            </ol>
+        </div>
+        <div class="content-zh">
+            <h2>专家系统开发技术（6个阶段）</h2>
+            <ol>
+                <li><strong>识别：</strong> 任务理解，需求形成</li>
+                <li><strong>概念化：</strong> 领域分析，概念识别</li>
+                <li><strong>形式化：</strong> 选择知识表示方法</li>
+                <li><strong>实现：</strong> 专家系统原型创建，知识库填充</li>
+                <li><strong>测试：</strong> 基于示例的系统评估</li>
+                <li><strong>试运行：</strong> 用户适用性验证</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Slide 15: End -->
+    <div class="slide">
+        <div class="content-ru active">
+            <h1>Спасибо за внимание!</h1>
+            <p>Конец презентации по Главе 1.</p>
+            <p>Для перехода к следующему материалу обратитесь к Главе 2: «Логическое программирование».</p>
+            <button onclick="location.reload()" style="margin-top:20px;padding:10px 20px;">Начать сначала</button>
+        </div>
+        <div class="content-en">
+            <h1>Thank You for Your Attention!</h1>
+            <p>End of Chapter 1 presentation.</p>
+            <p>To proceed to the next material, refer to Chapter 2: "Logic Programming".</p>
+            <button onclick="location.reload()" style="margin-top:20px;padding:10px 20px;">Restart</button>
+        </div>
+        <div class="content-zh">
+            <h1>感谢聆听！</h1>
+            <p>第1章演示结束。</p>
+            <p>继续学习请参考第2章："逻辑编程"。</p>
+            <button onclick="location.reload()" style="margin-top:20px;padding:10px 20px;">重新开始</button>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" disabled>←</button>
+        <span id="slideNum">1 / 15</span>
+        <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">→</button>
+    </div>
+</div>
+
+<script>
+    let currentSlide = 0;
+    let currentLang = 'ru';
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+
+    function setLanguage(lang) {
+        currentLang = lang;
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        document.querySelectorAll('.content-ru, .content-en, .content-zh').forEach(el => {
+            el.classList.remove('active');
+        });
+        document.querySelectorAll(`.content-${lang}`).forEach(el => {
+            el.classList.add('active');
+        });
+    }
+
+    function updateSlide() {
+        slides.forEach((slide, index) => {
+            slide.classList.remove('active');
+            if (index === currentSlide) slide.classList.add('active');
+        });
+        document.getElementById('slideNum').textContent = `${currentSlide + 1} / ${totalSlides}`;
+        document.getElementById('prevBtn').disabled = currentSlide === 0;
+        document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        document.getElementById('progress').style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+    }
+
+    function changeSlide(dir) {
+        currentSlide += dir;
+        if (currentSlide < 0) currentSlide = 0;
+        if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+        updateSlide();
+    }
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+            if (currentSlide < totalSlides - 1) changeSlide(1);
+        } else if (e.key === 'ArrowLeft') {
+            if (currentSlide > 0) changeSlide(-1);
+        }
+    });
+
+    updateSlide();
+</script>
+
+</body>
+</html>

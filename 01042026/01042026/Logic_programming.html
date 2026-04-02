@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Глава 2: Логическое программирование</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #ecf0f1;
+            --text-color: #333;
+            --slide-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Header & Controls */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .lang-btn {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .lang-btn.active {
+            background-color: var(--accent-color);
+        }
+
+        .nav-btn {
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 1rem;
+        }
+
+        .nav-btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        /* Slide Container */
+        #presentation-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .slide {
+            background-color: var(--slide-bg);
+            width: 100%;
+            max-width: 900px; /* Optimal for laptops/desktops */
+            height: 80%;
+            max-height: 600px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 40px;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            overflow-y: auto;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .slide h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        .slide ul {
+            line-height: 1.6;
+        }
+
+        .slide code {
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+            color: #c7254e;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .slide-number {
+            position: absolute;
+            bottom: 15px;
+            right: 20px;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .slide {
+                height: 90%;
+                padding: 20px;
+            }
+            h1 { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1 id="header-title">Глава 2: Логическое программирование</h1>
+    <div class="controls">
+        <button class="lang-btn active" onclick="setLanguage('ru')">RU</button>
+        <button class="lang-btn" onclick="setLanguage('en')">EN</button>
+        <button class="lang-btn" onclick="setLanguage('cn')">CN</button>
+    </div>
+</header>
+
+<div id="presentation-container">
+    <!-- Slide 1 -->
+    <div class="slide active" id="slide-1">
+        <h2 data-key="s1_title">Методологии программирования</h2>
+        <ul>
+            <li data-key="s1_p1"><strong>Императивное:</strong> Последовательное изменение состояния (C, Pascal). Основано на машине Тьюринга.</li>
+            <li data-key="s1_p2"><strong>Объектно-ориентированное (ООП):</strong> Объекты, инкапсуляция, наследование, полиморфизм (C++, Java).</li>
+            <li data-key="s1_p3"><strong>Функциональное:</strong> Вызов функций, отсутствие побочных эффектов, рекурсия вместо циклов (Lisp).</li>
+            <li data-key="s1_p4"><strong>Логическое:</strong> Описание проблемы фактами и правилами. Решение находится механизмом вывода (Prolog).</li>
+            <li data-key="s1_p5"><strong>В ограничениях:</strong> Поиск решения, удовлетворяющего набору ограничений.</li>
+        </ul>
+        <div class="slide-number">1 / 8</div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="slide" id="slide-2">
+        <h2 data-key="s2_title">Основы логического программирования</h2>
+        <p data-key="s2_text1">Программа содержит описание проблемы, а не алгоритм решения.</p>
+        <ul>
+            <li data-key="s2_p1"><strong>Факты:</strong> Аксиомы (например, <code>father(bob).</code>).</li>
+            <li data-key="s2_p2"><strong>Правила:</strong> Дизъюнкты Хорна (например, <code>man(X) :- father(X).</code>).</li>
+            <li data-key="s2_p3"><strong>Цели (Запросы):</strong> Утверждения, истинность которых нужно доказать.</li>
+        </ul>
+        <p data-key="s2_text2">Язык Prolog использует <strong>унификацию</strong> (сопоставление термов) и <strong>резолюцию</strong> (правило логического вывода).</p>
+        <div class="slide-number">2 / 8</div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="slide" id="slide-3">
+        <h2 data-key="s3_title">Процесс логического вывода в Prolog</h2>
+        <ul>
+            <li data-key="s3_p1"><strong>Прямой вывод (Forward Chaining):</strong> От фактов к цели. Эффективен при большом числе ответов.</li>
+            <li data-key="s3_p2"><strong>Обратный вывод (Backward Chaining):</strong> От цели к фактам. Стандарт для Prolog.</li>
+            <li data-key="s3_p3"><strong>Поиск в глубину:</strong> Prolog пытается доказать первую подцель полностью, прежде чем перейти к следующей.</li>
+            <li data-key="s3_p4"><strong>Бэктрекинг (Откат):</strong> Если подцель не доказана, система возвращается назад и ищет альтернативное решение.</li>
+        </ul>
+        <div class="slide-number">3 / 8</div>
+    </div>
+
+    <!-- Slide 4 -->
+    <div class="slide" id="slide-4">
+        <h2 data-key="s4_title">Структура программы на Prolog</h2>
+        <ul>
+            <li data-key="s4_p1"><code>domains</code>: Описание типов данных (доменов).</li>
+            <li data-key="s4_p2"><code>database</code>: Динамическая база данных (факты, изменяемые во время работы).</li>
+            <li data-key="s4_p3"><code>predicates</code>: Описание предикатов (имя и типы аргументов).</li>
+            <li data-key="s4_p4"><code>clauses</code>: Факты и правила программы.</li>
+            <li data-key="s4_p5"><code>goal</code>: Внутренняя цель программы (точка входа).</li>
+        </ul>
+        <div class="slide-number">4 / 8</div>
+    </div>
+
+    <!-- Slide 5 -->
+    <div class="slide" id="slide-5">
+        <h2 data-key="s5_title">Организация повторений</h2>
+        <p data-key="s5_text1">В Prolog нет циклов в традиционном понимании.</p>
+        <ul>
+            <li data-key="s5_p1"><strong>Рекурсия:</strong> Правило вызывает само себя. Требует условия выхода.</li>
+            <li data-key="s5_p2"><strong>Метод отката (Fail):</strong> Использование предиката <code>fail</code> для принудительного возврата и поиска следующего решения.</li>
+            <li data-key="s5_p3"><strong>Отсечение (Cut, !):</strong> Запрещает откат к предыдущим точкам выбора. Оптимизирует поиск и фиксирует выбор.</li>
+        </ul>
+        <div class="slide-number">5 / 8</div>
+    </div>
+
+    <!-- Slide 6 -->
+    <div class="slide" id="slide-6">
+        <h2 data-key="s6_title">Списки и Строки</h2>
+        <h3 data-key="s6_h3_lists">Списки</h3>
+        <ul>
+            <li data-key="s6_p1">Упорядоченный набор объектов: <code>[Head | Tail]</code>.</li>
+            <li data-key="s6_p2">Операции: поиск, слияние (<code>append</code>), сортировка.</li>
+        </ul>
+        <h3 data-key="s6_h3_strings">Строки</h3>
+        <ul>
+            <li data-key="s6_p3">Набор символов в двойных кавычках.</li>
+            <li data-key="s6_p4">Операции: длина (<code>str_len</code>), конкатенация (<code>concat</code>), подстроки.</li>
+        </ul>
+        <div class="slide-number">6 / 8</div>
+    </div>
+
+    <!-- Slide 7 -->
+    <div class="slide" id="slide-7">
+        <h2 data-key="s7_title">Файлы и Динамические БД</h2>
+        <h3 data-key="s7_h3_files">Файлы</h3>
+        <ul>
+            <li data-key="s7_p1">Открытие: <code>openwrite</code>, <code>openread</code>, <code>openappend</code>.</li>
+            <li data-key="s7_p2">Запись/Чтение: <code>writedevice</code>, <code>readdevice</code>.</li>
+        </ul>
+        <h3 data-key="s7_h3_db">Динамическая база данных</h3>
+        <ul>
+            <li data-key="s7_p3">Изменяется во время выполнения.</li>
+            <li data-key="s7_p4"><code>asserta</code> (добавить в начало), <code>assertz</code> (добавить в конец), <code>retract</code> (удалить).</li>
+        </ul>
+        <div class="slide-number">7 / 8</div>
+    </div>
+
+    <!-- Slide 8 -->
+    <div class="slide" id="slide-8">
+        <h2 data-key="s8_title">Создание экспертных систем</h2>
+        <p data-key="s8_text1">Экспертная система (ЭС) на Prolog состоит из:</p>
+        <ul>
+            <li data-key="s8_p1"><strong>Базы знаний:</strong> Продукционные правила (Если-То).</li>
+            <li data-key="s8_p2"><strong>Механизма вывода:</strong> Интерпретатор, реализующий цикл «распознавание-действие».</li>
+            <li data-key="s8_p3"><strong>Интерфейса:</strong> Диалог с пользователем (вопросы/ответы).</li>
+        </ul>
+        <p data-key="s8_text2">Пример: Система диагностики или выбора породы собаки на основе характеристик.</p>
+        <div class="slide-number">8 / 8</div>
+    </div>
+</div>
+
+<div style="text-align: center; padding: 20px;">
+    <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" disabled>← Назад</button>
+    <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Вперед →</button>
+</div>
+
+<script>
+    let currentSlide = 1;
+    const totalSlides = 8;
+    let currentLang = 'ru';
+
+    const translations = {
+        ru: {
+            header: "Глава 2: Логическое программирование",
+            prev: "← Назад",
+            next: "Вперед →",
+            s1_title: "Методологии программирования",
+            s1_p1: "<strong>Императивное:</strong> Последовательное изменение состояния (C, Pascal). Основано на машине Тьюринга.",
+            s1_p2: "<strong>Объектно-ориентированное (ООП):</strong> Объекты, инкапсуляция, наследование, полиморфизм (C++, Java).",
+            s1_p3: "<strong>Функциональное:</strong> Вызов функций, отсутствие побочных эффектов, рекурсия вместо циклов (Lisp).",
+            s1_p4: "<strong>Логическое:</strong> Описание проблемы фактами и правилами. Решение находится механизмом вывода (Prolog).",
+            s1_p5: "<strong>В ограничениях:</strong> Поиск решения, удовлетворяющего набору ограничений.",
+            s2_title: "Основы логического программирования",
+            s2_text1: "Программа содержит описание проблемы, а не алгоритм решения.",
+            s2_p1: "<strong>Факты:</strong> Аксиомы (например, <code>father(bob).</code>).",
+            s2_p2: "<strong>Правила:</strong> Дизъюнкты Хорна (например, <code>man(X) :- father(X).</code>).",
+            s2_p3: "<strong>Цели (Запросы):</strong> Утверждения, истинность которых нужно доказать.",
+            s2_text2: "Язык Prolog использует <strong>унификацию</strong> (сопоставление термов) и <strong>резолюцию</strong> (правило логического вывода).",
+            s3_title: "Процесс логического вывода в Prolog",
+            s3_p1: "<strong>Прямой вывод (Forward Chaining):</strong> От фактов к цели. Эффективен при большом числе ответов.",
+            s3_p2: "<strong>Обратный вывод (Backward Chaining):</strong> От цели к фактам. Стандарт для Prolog.",
+            s3_p3: "<strong>Поиск в глубину:</strong> Prolog пытается доказать первую подцель полностью, прежде чем перейти к следующей.",
+            s3_p4: "<strong>Бэктрекинг (Откат):</strong> Если подцель не доказана, система возвращается назад и ищет альтернативное решение.",
+            s4_title: "Структура программы на Prolog",
+            s4_p1: "<code>domains</code>: Описание типов данных (доменов).",
+            s4_p2: "<code>database</code>: Динамическая база данных (факты, изменяемые во время работы).",
+            s4_p3: "<code>predicates</code>: Описание предикатов (имя и типы аргументов).",
+            s4_p4: "<code>clauses</code>: Факты и правила программы.",
+            s4_p5: "<code>goal</code>: Внутренняя цель программы (точка входа).",
+            s5_title: "Организация повторений",
+            s5_text1: "В Prolog нет циклов в традиционном понимании.",
+            s5_p1: "<strong>Рекурсия:</strong> Правило вызывает само себя. Требует условия выхода.",
+            s5_p2: "<strong>Метод отката (Fail):</strong> Использование предиката <code>fail</code> для принудительного возврата и поиска следующего решения.",
+            s5_p3: "<strong>Отсечение (Cut, !):</strong> Запрещает откат к предыдущим точкам выбора. Оптимизирует поиск и фиксирует выбор.",
+            s6_title: "Списки и Строки",
+            s6_h3_lists: "Списки",
+            s6_p1: "Упорядоченный набор объектов: <code>[Head | Tail]</code>.",
+            s6_p2: "Операции: поиск, слияние (<code>append</code>), сортировка.",
+            s6_h3_strings: "Строки",
+            s6_p3: "Набор символов в двойных кавычках.",
+            s6_p4: "Операции: длина (<code>str_len</code>), конкатенация (<code>concat</code>), подстроки.",
+            s7_title: "Файлы и Динамические БД",
+            s7_h3_files: "Файлы",
+            s7_p1: "Открытие: <code>openwrite</code>, <code>openread</code>, <code>openappend</code>.",
+            s7_p2: "Запись/Чтение: <code>writedevice</code>, <code>readdevice</code>.",
+            s7_h3_db: "Динамическая база данных",
+            s7_p3: "Изменяется во время выполнения.",
+            s7_p4: "<code>asserta</code> (добавить в начало), <code>assertz</code> (добавить в конец), <code>retract</code> (удалить).",
+            s8_title: "Создание экспертных систем",
+            s8_text1: "Экспертная система (ЭС) на Prolog состоит из:",
+            s8_p1: "<strong>Базы знаний:</strong> Продукционные правила (Если-То).",
+            s8_p2: "<strong>Механизма вывода:</strong> Интерпретатор, реализующий цикл «распознавание-действие».",
+            s8_p3: "<strong>Интерфейса:</strong> Диалог с пользователем (вопросы/ответы).",
+            s8_text2: "Пример: Система диагностики или выбора породы собаки на основе характеристик."
+        },
+        en: {
+            header: "Chapter 2: Logical Programming",
+            prev: "← Back",
+            next: "Next →",
+            s1_title: "Programming Methodologies",
+            s1_p1: "<strong>Imperative:</strong> Sequential state change (C, Pascal). Based on Turing Machine.",
+            s1_p2: "<strong>Object-Oriented (OOP):</strong> Objects, encapsulation, inheritance, polymorphism (C++, Java).",
+            s1_p3: "<strong>Functional:</strong> Function calls, no side effects, recursion instead of loops (Lisp).",
+            s1_p4: "<strong>Logical:</strong> Problem description via facts and rules. Solution found by inference engine (Prolog).",
+            s1_p5: "<strong>Constraint:</strong> Finding a solution that satisfies a set of constraints.",
+            s2_title: "Basics of Logical Programming",
+            s2_text1: "The program contains a problem description, not a solution algorithm.",
+            s2_p1: "<strong>Facts:</strong> Axioms (e.g., <code>father(bob).</code>).",
+            s2_p2: "<strong>Rules:</strong> Horn clauses (e.g., <code>man(X) :- father(X).</code>).",
+            s2_p3: "<strong>Goals (Queries):</strong> Statements whose truth needs to be proven.",
+            s2_text2: "Prolog uses <strong>unification</strong> (term matching) and <strong>resolution</strong> (inference rule).",
+            s3_title: "Logical Inference Process in Prolog",
+            s3_p1: "<strong>Forward Chaining:</strong> From facts to goal. Efficient for many answers.",
+            s3_p2: "<strong>Backward Chaining:</strong> From goal to facts. Standard for Prolog.",
+            s3_p3: "<strong>Depth-First Search:</strong> Prolog tries to prove the first subgoal completely before moving to the next.",
+            s3_p4: "<strong>Backtracking:</strong> If a subgoal fails, the system goes back and seeks an alternative solution.",
+            s4_title: "Prolog Program Structure",
+            s4_p1: "<code>domains</code>: Data type descriptions.",
+            s4_p2: "<code>database</code>: Dynamic database (facts changeable at runtime).",
+            s4_p3: "<code>predicates</code>: Predicate descriptions (name and argument types).",
+            s4_p4: "<code>clauses</code>: Facts and rules of the program.",
+            s4_p5: "<code>goal</code>: Internal goal of the program (entry point).",
+            s5_title: "Organization of Repetitions",
+            s5_text1: "Prolog has no loops in the traditional sense.",
+            s5_p1: "<strong>Recursion:</strong> Rule calls itself. Requires an exit condition.",
+            s5_p2: "<strong>Fail Method:</strong> Using <code>fail</code> predicate to force backtracking and find next solution.",
+            s5_p3: "<strong>Cut (!):</strong> Prevents backtracking to previous choice points. Optimizes search and fixes choices.",
+            s6_title: "Lists and Strings",
+            s6_h3_lists: "Lists",
+            s6_p1: "Ordered set of objects: <code>[Head | Tail]</code>.",
+            s6_p2: "Operations: search, append (<code>append</code>), sorting.",
+            s6_h3_strings: "Strings",
+            s6_p3: "Set of characters in double quotes.",
+            s6_p4: "Operations: length (<code>str_len</code>), concatenation (<code>concat</code>), substrings.",
+            s7_title: "Files and Dynamic DBs",
+            s7_h3_files: "Files",
+            s7_p1: "Opening: <code>openwrite</code>, <code>openread</code>, <code>openappend</code>.",
+            s7_p2: "Write/Read: <code>writedevice</code>, <code>readdevice</code>.",
+            s7_h3_db: "Dynamic Database",
+            s7_p3: "Changes during execution.",
+            s7_p4: "<code>asserta</code> (add to start), <code>assertz</code> (add to end), <code>retract</code> (delete).",
+            s8_title: "Creating Expert Systems",
+            s8_text1: "An Expert System (ES) in Prolog consists of:",
+            s8_p1: "<strong>Knowledge Base:</strong> Production rules (If-Then).",
+            s8_p2: "<strong>Inference Engine:</strong> Interpreter implementing 'recognize-act' cycle.",
+            s8_p3: "<strong>Interface:</strong> User dialogue (questions/answers).",
+            s8_text2: "Example: Diagnostic system or dog breed selector based on characteristics."
+        },
+        cn: {
+            header: "第 2 章：逻辑编程",
+            prev: "← 返回",
+            next: "前进 →",
+            s1_title: "编程方法论",
+            s1_p1: "<strong>命令式：</strong>顺序状态改变 (C, Pascal)。基于图灵机。",
+            s1_p2: "<strong>面向对象 (OOP)：</strong>对象、封装、继承、多态 (C++, Java)。",
+            s1_p3: "<strong>函数式：</strong>函数调用，无副作用，递归代替循环 (Lisp)。",
+            s1_p4: "<strong>逻辑式：</strong>通过事实和规则描述问题。由推理机寻找解 (Prolog)。",
+            s1_p5: "<strong>约束式：</strong>寻找满足一组约束的解。",
+            s2_title: "逻辑编程基础",
+            s2_text1: "程序包含问题描述，而非解决算法。",
+            s2_p1: "<strong>事实：</strong>公理 (例如 <code>father(bob).</code>)。",
+            s2_p2: "<strong>规则：</strong>霍恩子句 (例如 <code>man(X) :- father(X).</code>)。",
+            s2_p3: "<strong>目标 (查询)：</strong>需要证明其真实性的陈述。",
+            s2_text2: "Prolog 使用<strong>合一</strong> (项匹配) 和<strong>归结</strong> (推理规则)。",
+            s3_title: "Prolog 中的逻辑推理过程",
+            s3_p1: "<strong>正向链 (Forward Chaining)：</strong>从事实到目标。适用于多答案情况。",
+            s3_p2: "<strong>反向链 (Backward Chaining)：</strong>从目标到事实。Prolog 的标准。",
+            s3_p3: "<strong>深度优先搜索：</strong>Prolog 尝试完全证明第一个子目标，然后再处理下一个。",
+            s3_p4: "<strong>回溯 (Backtracking)：</strong>如果子目标失败，系统返回并寻找替代解。",
+            s4_title: "Prolog 程序结构",
+            s4_p1: "<code>domains</code>: 数据类型描述。",
+            s4_p2: "<code>database</code>: 动态数据库 (运行时可变的事实)。",
+            s4_p3: "<code>predicates</code>: 谓词描述 (名称和参数类型)。",
+            s4_p4: "<code>clauses</code>: 程序的事实和规则。",
+            s4_p5: "<code>goal</code>: 程序的内部目标 (入口点)。",
+            s5_title: "重复的组织",
+            s5_text1: "Prolog 没有传统意义上的循环。",
+            s5_p1: "<strong>递归：</strong>规则调用自身。需要退出条件。",
+            s5_p2: "<strong>Fail 方法：</strong>使用 <code>fail</code> 谓词强制回溯并寻找下一个解。",
+            s5_p3: "<strong>截断 (Cut, !)：</strong>禁止回溯到之前的选择点。优化搜索并固定选择。",
+            s6_title: "列表和字符串",
+            s6_h3_lists: "列表",
+            s6_p1: "有序对象集：<code>[Head | Tail]</code>。",
+            s6_p2: "操作：搜索、合并 (<code>append</code>)、排序。",
+            s6_h3_strings: "字符串",
+            s6_p3: "双引号中的字符集。",
+            s6_p4: "操作：长度 (<code>str_len</code>)、连接 (<code>concat</code>)、子串。",
+            s7_title: "文件和动态数据库",
+            s7_h3_files: "文件",
+            s7_p1: "打开：<code>openwrite</code>, <code>openread</code>, <code>openappend</code>。",
+            s7_p2: "写/读：<code>writedevice</code>, <code>readdevice</code>。",
+            s7_h3_db: "动态数据库",
+            s7_p3: "在执行过程中变化。",
+            s7_p4: "<code>asserta</code> (添加到开头), <code>assertz</code> (添加到结尾), <code>retract</code> (删除)。",
+            s8_title: "创建专家系统",
+            s8_text1: "Prolog 中的专家系统 (ES) 由以下部分组成：",
+            s8_p1: "<strong>知识库：</strong>产生式规则 (If-Then)。",
+            s8_p2: "<strong>推理机：</strong>实现“识别 - 动作”循环的解释器。",
+            s8_p3: "<strong>接口：</strong>用户对话 (问答)。",
+            s8_text2: "示例：基于特征的诊断系统或犬种选择系统。"
+        }
+    };
+
+    function setLanguage(lang) {
+        currentLang = lang;
+        
+        // Update buttons
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.lang-btn[onclick="setLanguage('${lang}')"]`).classList.add('active');
+
+        // Update Header
+        document.getElementById('header-title').innerText = translations[lang].header;
+        document.getElementById('prevBtn').innerText = translations[lang].prev;
+        document.getElementById('nextBtn').innerText = translations[lang].next;
+
+        // Update Slides
+        document.querySelectorAll('[data-key]').forEach(el => {
+            const key = el.getAttribute('data-key');
+            if (translations[lang][key]) {
+                el.innerHTML = translations[lang][key];
+            }
+        });
+    }
+
+    function changeSlide(direction) {
+        const nextSlideNum = currentSlide + direction;
+        
+        if (nextSlideNum >= 1 && nextSlideNum <= totalSlides) {
+            // Hide current
+            document.getElementById(`slide-${currentSlide}`).classList.remove('active');
+            
+            // Show next
+            currentSlide = nextSlideNum;
+            document.getElementById(`slide-${currentSlide}`).classList.add('active');
+            
+            // Update buttons state
+            document.getElementById('prevBtn').disabled = (currentSlide === 1);
+            document.getElementById('nextBtn').disabled = (currentSlide === totalSlides);
+        }
+    }
+</script>
+
+</body>
+</html>
