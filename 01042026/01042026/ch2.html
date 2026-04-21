@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 2: The Process of Neural Networks</title>
+    <style>
+        :root {
+            --primary-color: #8e44ad;
+            --secondary-color: #9b59b6;
+            --accent-color: #f1c40f;
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+            --bg-gradient: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .presentation-container {
+            width: 90vw;
+            height: 90vh; /* Fixed height for presentation feel */
+            max-width: 1600px;
+            aspect-ratio: 16/9;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            padding: 60px 80px;
+            background: #f4f7f6;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 4px solid var(--primary-color);
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            color: var(--text-dark);
+            font-size: 2.8em;
+            margin-bottom: 10px;
+        }
+
+        .header h2 {
+            color: var(--text-light);
+            font-size: 1.8em;
+            font-weight: 400;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary-color);
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .en-text {
+            color: var(--text-dark);
+            font-size: 1.15em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .ru-text {
+            color: var(--text-light);
+            font-size: 1.05em;
+            line-height: 1.6;
+            font-style: italic;
+            border-top: 1px dashed #ddd;
+            padding-top: 10px;
+        }
+
+        .highlight {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4);
+        }
+
+        .btn:hover:not(:disabled) {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .progress-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: #eee;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .download-btn {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 10;
+            box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+        }
+
+        .download-btn:hover {
+            background: #2ecc71;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        li {
+            margin-bottom: 8px;
+            list-style-type: none;
+            position: relative;
+            padding-left: 20px;
+        }
+        li::before {
+            content: "•";
+            color: var(--primary-color);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        @media (max-width: 1000px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            .slide {
+                padding: 40px;
+            }
+            .header h1 { font-size: 2em; }
+            .header h2 { font-size: 1.4em; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="presentation-container">
+    <button class="download-btn" onclick="downloadFile()">📥 Download Presentation</button>
+
+    <!-- Slide 1: Title -->
+    <div class="slide active">
+        <div class="header">
+            <h1>Chapter 2: The Process of Neural Networks</h1>
+            <h2>Глава 2: Процесс нейронных сетей</h2>
+        </div>
+        <div class="content-grid">
+            <div class="card full-width" style="text-align: center; border-left: none; background: transparent; box-shadow: none;">
+                <p class="en-text" style="font-size: 1.5em;">🧠 Exploring Architecture, History, and Types of Neural Networks</p>
+                <p class="ru-text" style="font-size: 1.3em; border: none;">🧠 Исследование архитектуры, истории и типов нейронных сетей</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2: Introduction to Neural Networks -->
+    <div class="slide">
+        <div class="header">
+            <h1>Introduction to Neural Networks</h1>
+            <h2>Введение в нейронные сети</h2>
+        </div>
+        <div class="content-grid">
+            <div class="card">
+                <p class="en-text"><span class="highlight">Definition:</span> Neural networks are very important for machines. A properly programmed neural network helps the machine think like a person and process information.</p>
+                <p class="ru-text"><span class="highlight">Определение:</span> Нейронные сети очень важны для машин. Правильно запрограммированная сеть помогает машине думать как человек и обрабатывать информацию.</p>
+            </div>
+            <div class="card">
+                <p class="en-text"><span class="highlight">Structure:</span> These networks are made out of layers. Each layer is made out of neurons that work together to solve problems.</p>
+                <p class="ru-text"><span class="highlight">Структура:</span> Эти сети состоят из слоев. Каждый слой состоит из нейронов, которые работают вместе для решения задач.</p>
+            </div>
+            <div class="card full-width">
+                <p class="en-text">💡 <span class="highlight">Key Concept:</span> Since neural networks help machines think like humans, machines with neural networks are capable of learning. Pattern recognition and data classification are key uses.</p>
+                <p class="ru-text">💡 <span class="highlight">Ключевая концепция:</span> Поскольку сети помогают машинам думать как люди, машины с такими сетями способны учиться. Распознавание образов и классификация данных — ключевые применения.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Historical Background -->
+    <div class="slide">
+        <div class="header">
+            <h1>Historical Background</h1>
+            <h2>Историческая справка</h2>
+        </div>
+        <div class="content-grid">
+            <div class="card">
+                <p class="en-text"><span class="highlight">Origins:</span> Neural networks existed before computers, but people lacked proficiency to use them. Recent advances in computer tech have fueled research.</p>
+                <p class="ru-text"><span class="highlight">Истоки:</span> Нейросети существовали до компьютеров, но людям не хватало навыков для их использования. Недавний прогресс в компьютерных технологиях подстегнул исследования.</p>
+            </div>
+            <div class="card">
+                <p class="en-text"><span class="highlight">1943 Milestone:</span> The first artificial neural network was made by Warren McCullough and Walter Pitts. Called the "McCullough-Pitts neurons".</p>
+                <p class="ru-text"><span class="highlight">Веха 1943 года:</span> Первая искусственная нейронная сеть была создана Уорреном Маккалохом и Уолтером Питтсом. Называлась «нейроны Маккалоха-Питтса».</p>
+            </div>
+            <div class="card full-width">
+                <p class="en-text">🧠 <span class="highlight">Analogy:</span> A computational distributed model made of simple parallel processors with tiny connections. Similar to the human brain's neurons interconnected via synapses.</p>
+                <p class="ru-text">🧠 <span class="highlight">Аналогия:</span> Вычислительная распределенная модель из простых параллельных процессоров с крошечными связями. Похоже на нейроны человеческого мозга, соединенные синапсами.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Types of Neural Networks (Overview) -->
+    <div class="slide">
+        <div class="header">
+            <h1>Types of Neural Networks</h1>
+            <h2>Типы нейронных сетей</h2>
+        </div>
+        <div class="content-grid">
+            <div class="card full-width">
+                <p class="en-text">There are several distinct architectures designed for different tasks:</p>
+                <p class="ru-text">Существует несколько различных архитектур, разработанных для разных задач:</p>
+                <ul>
+                    <li class="en-text">1. Fully connected neural network</li>
+                    <li class="ru-text">1. Полносвязная нейронная сеть</li>
+                    <li class="en-text">2. Perceptrons</li>
+                    <li class="ru-text">2. Персептроны</li>
+                    <li class="en-text">3. Feed-forward Networks</li>
+                    <li class="ru-text">3. Сети прямой передачи (Feed-forward)</li>
+                    <li class="en-text">4. Convolutional neural networks (CNN)</li>
+                    <li class="ru-text">4. Сверточные нейронные сети (CNN)</li>
+                    <li class="en-text">5. Feedback networks</li>
+                    <li class="ru-text">5. Сети с обратной связью</li>
+                    <li class="en-text">6. Recurrent neural networks (RNN)</li>
+                    <li class="ru-text">6. Рекуррентные нейронные сети (RNN)</li>
+                    <li class="en-text">7. Generative adversarial network (GAN)</li>
+                    <li class="ru-text">7. Генеративно-состязательные сети (GAN)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Fully Connected & Perceptrons -->
+    <div class="slide">
+        <div class="header">
+            <h1>Fully Connected & Perceptrons</h1>
+            <h2>Полносвязные сети и Персептроны</h2>
+        </div>
+        <div class="content-grid">
+            <div class="card">
+                <p class="en-text"><span class="highlight">Fully Connected:</span> The most basic type. Composed of three layers: Input (engineer gives data), Hidden, and Output. Nodes dictate how input views data.</p>
+                <p class="ru-text"><span class="highlight">Полносвязная:</span> Самый базовый тип. Состоит из трех слоев: Входной (инженер дает данные), Скрытый и Выходной. Узлы диктуют, как вход воспринимает данные.</p>
+            </div>
+            <div class="card">
+                <p class="en-text"><span class="highlight">Perceptrons:</span> Coined in 1960 by Frank Rosenblatt. A McCullough-Pitts model assigned a preprocessing and fixed weight. Easier to use for pattern recognition.</p>
+                <p class="ru-text"><span class="highlight">Персептроны:</span> Термин введен в 1960 году Фрэнком Розенблаттом. Модель Маккалоха-Питтса с предварительной обработкой и фиксированным весом. Проще использовать для распознавания образов.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Feed-forward & CNN -->
+    <div class="slide">
+        <div class="header">
+            <h1>Feed-forward & CNN</h1>
+            <h2>Прямая передача и Сверточные сети</h2>
+        </div>
+        <div class="content-grid">
+            <div class="card">
+                <p class="en-text"><span class="highlight">Feed-forward:</span> Signals flow in one direction (input to output). No feedback loop. Simplest network, often used in pattern recognition.</p>
+                <p class="ru-text"><span class="highlight">Прямая передача:</span> Сигналы текут в одном направлении (от входа к выходу). Без петли обратной связи. Простейшая сеть, часто используется для распознавания образов.</p>
+            </div>
+            <div class="card">
+                <p class="en-text"><span class="highlight">Convolutional (CNN):</span> Similar to fully connected but views input as an image. Reduces instances in the dataset. Used by most deep learning programs.</p>
+                <p class="ru-text"><span class="highlight">Сверточная (CNN):</span> Похожа на полносвязную, но рассматривает вход как изображение. Уменьшает количество экземпляров в наборе данных. Используется в большинстве программ глубокого обучения.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Feedback & Recurrent (RNN) -->
+    <div class="slide">
+        <div class="header">
+            <h1>Feedback & Recurrent Networks</h1>
+            <h2>Сети с обратной связью и Рекуррентные</h2>
+        </div>
+        <div class="content-grid">
+            <div class="card">
+                <p class="en-text"><span class="highlight">Feedback Networks:</span> Signals flow in both directions, inducing a loop. Difficult to make but powerful. Functions in a state of equilibrium until changed.</p>
+                <p class="ru-text"><span class="highlight">Сети с обратной связью:</span> Сигналы текут в обоих направлениях, создавая петлю. Сложны в создании, но мощны. Функционируют в состоянии равновесия до изменения.</p>
+            </div>
+            <div class="card">
+                <p class="en-text"><span class="highlight">Recurrent (RNN):</span> Information always loops. Considers input and assesses what it has learned. Has short-term memory (can gain long-term with LSTM).</p>
+                <p class="ru-text"><span class="highlight">Рекуррентные (RNN):</span> Информация всегда зацикливается. Учитывает вход и оценивает изученное. Имеет краткосрочную память (может получить долгосрочную с LSTM).</p>
+            </div>
+            <div class="card full-width">
+                <p class="en-text">🔄 <span class="highlight">RNN vs Feed-forward:</span> Unlike feed-forward, RNN applies weight to both previous and current input data. Great for predicting sequences (e.g., text characters).</p>
+                <p class="ru-text">🔄 <span class="highlight">RNN против Feed-forward:</span> В отличие от прямой передачи, RNN применяет вес как к предыдущим, так и к текущим входным данным. Отлично подходит для предсказания последовательностей (например, символов текста).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Generative Adversarial Network (GAN) -->
+    <div class="slide">
+        <div class="header">
+            <h1>Generative Adversarial Network (GAN)</h1>
+            <h2>Генеративно-состязательная сеть (GAN)</h2>
+        </div>
+        <div class="content-grid">
+            <div class="card">
+                <p class="en-text"><span class="highlight">Concept:</span> Made of two networks pitted against each other (Adversarial). Can learn to mimic any distribution or dataset.</p>
+                <p class="ru-text"><span class="highlight">Концепция:</span> Состоит из двух сетей, выставленных друг против друга (Состязательные). Может научиться имитировать любое распределение или набор данных.</p>
+            </div>
+            <div class="card">
+                <p class="en-text"><span class="highlight">Components:</span> <br>1. <b>Generator:</b> Creates data instances.<br>2. <b>Discriminator:</b> Evaluates if instances are from training data or generated.</p>
+                <p class="ru-text"><span class="highlight">Компоненты:</span> <br>1. <b>Генератор:</b> Создает экземпляры данных.<br>2. <b>Дискриминатор:</b> Оценивает, являются ли экземпляры из обучающих данных или сгенерированными.</p>
+            </div>
+            <div class="card full-width">
+                <p class="en-text">🎨 <span class="highlight">Capability:</span> Can simultaneously process pictures, prose, speech, etc. Used to build something unique in many domains.</p>
+                <p class="ru-text">🎨 <span class="highlight">Возможности:</span> Может одновременно обрабатывать картинки, прозу, речь и т.д. Используется для создания чего-то уникального во многих областях.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: Training the Neural Network -->
+    <div class="slide">
+        <div class="header">
+            <h1>Training the Neural Network</h1>
+            <h2>Обучение нейронной сети</h2>
+        </div>
+        <div class="content-grid">
+            <div class="card full-width">
+                <p class="en-text"><span class="highlight">Error Back-propagation:</span> The most positive method. Symmetrically adjusts weights of connections and neurons. If the system makes a mistake, it learns and gets closer to the solution.</p>
+                <p class="ru-text"><span class="highlight">Обратное распространение ошибки:</span> Самый эффективный метод. Симметрично корректирует веса связей и нейронов. Если система ошибается, она учится и приближается к решению.</p>
+            </div>
+            <div class="card">
+                <p class="en-text"><span class="highlight">Stage 1:</span> Forward Propagation. Data moves through the network to generate an output.</p>
+                <p class="ru-text"><span class="highlight">Этап 1:</span> Прямое распространение. Данные движутся через сеть для генерации выхода.</p>
+            </div>
+            <div class="card">
+                <p class="en-text"><span class="highlight">Stage 2:</span> Back Propagation. The error is calculated and sent back to adjust weights.</p>
+                <p class="ru-text"><span class="highlight">Этап 2:</span> Обратное распространение. Ошибка вычисляется и отправляется назад для корректировки весов.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Conclusion -->
+    <div class="slide">
+        <div class="header">
+            <h1>Conclusion</h1>
+            <h2>Заключение</h2>
+        </div>
+        <div class="content-grid">
+            <div class="card full-width">
+                <p class="en-text">🚀 <span class="highlight">Potential:</span> Neural networks are a very interesting field of study. They have a huge amount of potential to aid the creation of future developments in computer science.</p>
+                <p class="ru-text">🚀 <span class="highlight">Потенциал:</span> Нейронные сети — очень интересная область изучения. Они имеют огромный потенциал для помощи в создании будущих разработок в компьютерных науках.</p>
+            </div>
+            <div class="card full-width">
+                <p class="en-text">🤖 <span class="highlight">Structure:</span> In an Artificial Neural Network (ANN), neurons are mimicked by thousands (sometimes millions) of tiny processing units, all linked together.</p>
+                <p class="ru-text">🤖 <span class="highlight">Структура:</span> В искусственной нейронной сети (ANN) нейроны имитируются тысячами (иногда миллионами) крошечных процессорных единиц, все связаны вместе.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="controls">
+        <button class="btn" id="prevBtn" onclick="changeSlide(-1)">◀ Previous</button>
+        <span style="color: #7f8c8d; font-weight: bold;" id="slideIndicator">1 / 10</span>
+        <button class="btn" id="nextBtn" onclick="changeSlide(1)">Next ▶</button>
+    </div>
+</div>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const slideIndicator = document.getElementById('slideIndicator');
+    const progressBar = document.getElementById('progressBar');
+
+    function updateSlide() {
+        slides.forEach((slide, index) => {
+            slide.classList.remove('active');
+            if (index === currentSlide) {
+                slide.classList.add('active');
+            }
+        });
+
+        prevBtn.disabled = currentSlide === 0;
+        nextBtn.disabled = currentSlide === totalSlides - 1;
+        slideIndicator.textContent = `${currentSlide + 1} / ${totalSlides}`;
+        progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+    }
+
+    function changeSlide(direction) {
+        currentSlide += direction;
+        if (currentSlide < 0) currentSlide = 0;
+        if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+        updateSlide();
+    }
+
+    function downloadFile() {
+        const htmlContent = document.documentElement.outerHTML;
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Chapter2_Neural_Networks_Presentation.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'ArrowRight' || event.key === ' ') {
+            changeSlide(1);
+        } else if (event.key === 'ArrowLeft') {
+            changeSlide(-1);
+        }
+    });
+
+    // Initialize
+    updateSlide();
+</script>
+
+</body>
+</html>
