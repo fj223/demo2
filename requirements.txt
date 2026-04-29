@@ -1,5 +1,13 @@
-#pip install -r requirements.txt
+# 安装命令：pip install -r requirements.txt
+
+# 浏览器自动化库 - 用于加载和渲染HTML页面
 playwright==1.58.0
+
+# 图像处理库 - 用于处理图片
 Pillow==10.0.1
+
+# PPTX生成库 - 用于创建和编辑PowerPoint文件
 python-pptx==1.0.2
+
+# 剪贴板操作库 - 用于从剪贴板读取文本（可选）
 pyperclip==1.8.2

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Интерактивные презентации: Программно-аппаратные комплексы ИИ (2 семестр)</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1e40af;
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --text: #0f172a;
+    --text-muted: #475569;
+    --border: #e2e8f0;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  
+  /* Presentation Wrapper */
+  .presentation-wrapper {
+    width: 100%;
+    min-height: 100vh;
+    background: white;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  
+  header { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 1.5rem; text-align: center; box-shadow: var(--shadow); }
+  header h1 { font-size: 1.5rem; margin-bottom: 0.3rem; }
+  header p { opacity: 0.9; font-size: 0.95rem; }
+  nav { display: flex; gap: 0.5rem; padding: 1rem; overflow-x: auto; background: var(--card-bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+  nav button { padding: 0.6rem 1rem; border: 1px solid var(--border); background: white; border-radius: 20px; cursor: pointer; font-weight: 500; white-space: nowrap; transition: all 0.2s; }
+  nav button.active { background: var(--primary); color: white; border-color: var(--primary); }
+  
+  /* Slide Styles */
+  .slide {
+    display: none;
+    min-height: calc(100vh - 150px);
+    padding: 2rem;
+    animation: fadeIn 0.4s ease;
+  }
+  
+  .slide.active {
+    display: block;
+  }
+  
+  /* Presentation Styles - Make all presentations visible for extraction */
+  .presentation {
+    display: block;
+    min-height: calc(100vh - 150px);
+    padding: 2rem;
+    animation: fadeIn 0.4s ease;
+  }
+  
+  .presentation.active {
+    display: block;
+  }
+  
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  
+  .slide-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid var(--primary);
+  }
+  
+  .slide-header h2 {
+    color: var(--primary-dark);
+    font-size: 1.8em;
+    margin-bottom: 0.5rem;
+  }
+  
+  .q-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  .card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; border: 1px solid var(--border); }
+  .card-header { padding: 1rem; background: #f1f5f9; border-bottom: 1px solid var(--border); font-weight: 600; }
+  .card-body { padding: 1rem; }
+  
+  /* Toggle Content - Use display:none for initial state (required for extraction) */
+  .content-block {
+    display: none;
+    max-height: none;
+    overflow: visible;
+    margin-top: 0.8rem;
+    padding-top: 0.8rem;
+    border-top: 1px dashed var(--border);
+  }
+
+  .content-block.force-open {
+    display: block !important;
+  }
+
+  .content-block.open {
+    display: block;
+  }
+  
+  .section-title { font-weight: 600; margin: 0.8rem 0 0.4rem; color: var(--primary-dark); }
+  .solution { background: #ecfdf5; padding: 0.8rem; border-radius: 8px; margin-top: 0.5rem; border-left: 3px solid var(--success); }
+  
+  /* Navigation Controls */
+  .controls {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    z-index: 100;
+  }
+  
+  .nav-btn {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1em;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+  }
+  
+  .nav-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.6);
+  }
+  
+  .nav-btn:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  
+  .slide-indicator {
+    color: var(--primary-dark);
+    font-size: 1.1em;
+    font-weight: bold;
+    min-width: 80px;
+    text-align: center;
+  }
+  
+  footer { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem; }
+  @media (max-width: 600px) { 
+    .q-grid { grid-template-columns: 1fr; } 
+    header h1 { font-size: 1.2rem; }
+    .slide-header h2 { font-size: 1.4em; }
+  }
+</style>
+</head>
+<body>
+<div class="presentation-wrapper">
+  <header>
+    <h1>Программно-аппаратные комплексы ИИ</h1>
+    <p>Интерактивные презентации по вопросам экзамена (2 семестр) • 5 блоков × 5 вопросов</p>
+  </header>
+
+  <nav id="nav">
+    <button class="active" data-pres="1">Презентация 1: Вычислительная база ИИ</button>
+    <button data-pres="2">Презентация 2: Архитектура и программирование GPU</button>
+    <button data-pres="3">Презентация 3: Библиотеки и оптимизация</button>
+    <button data-pres="4">Презентация 4: Управление памятью и SIMT</button>
+    <button data-pres="5">Презентация 5: Системная интеграция и перспективы</button>
+  </nav>
+
+  <div class="controls">
+    <button class="nav-btn" id="prevBtn" onclick="prevSlide()">⬅️ Предыдущий</button>
+    <span class="slide-indicator" id="slideIndicator">1 / 5</span>
+    <button class="nav-btn" id="nextBtn" onclick="nextSlide()">Следующий ➡️</button>
+  </div>
+
+  <main id="main"></main>
+
+</div>
+<script>
+const data = [
+  {
+    id: 1, title: "Презентация 1: Вычислительная база ИИ",
+    questions: [
+      { q: "1. Роль вычислительных средств в реализации систем ИИ", theory: "ИИ-модели требуют обработки огромных объёмов данных. Вычислительные средства определяют скорость обучения, качество инференса и масштабируемость. Современные системы ИИ переходят от CPU к GPU/TPU из-за массового параллелизма матричных операций.", task: "Оцените, почему обучение Transformer-модели на CPU займёт в десятки раз больше времени, чем на GPU.", solution: "Transformer содержит операции внимания и умножения матриц (GEMM), которые имеют сложность O(N²). CPU оптимизирован для последовательных операций и ветвлений, а GPU содержит тысячи ядер, способных выполнять матричные операции одновременно. При размере батча 1024 и длине последовательности 512, GPU достигает ускорения в 30–50× за счёт параллелизма и высокой пропускной способности памяти." },
+      { q: "2. Свойства универсальных вычислителей (CPU) в ИИ", theory: "CPU обеспечивает высокую гибкость, поддерживает сложные ветвления, управление памятью и последовательную логику. Подходит для предобработки данных, инференса лёгких моделей и управления рабочим процессом.", task: "Определите, при каких сценариях CPU остаётся предпочтительным решением для задач ИИ.", solution: "1) Работа с разреженными графами и динамическими структурами данных. 2) Предобработка текста/аудио, где важны последовательные алгоритмы. 3) Инференс на edge-устройствах с ограниченным энергопотреблением. 4) Координация распределённого обучения (orchestration)." },
+      { q: "3. Специализированные вычислители и их отличительные черты", theory: "TPU, NPU, VPU и AI-ускорители оптимизированы под тензорные операции, низкую точность (INT8/FP16) и энергоэффективность. Имеют фиксированные конвейеры и минимум логики ветвления.", task: "Сравните NPU и GPU для задачи детекции объектов на видеопотоке в реальном времени.", solution: "GPU даёт высокую точность и гибкость (поддержка разных фреймворков), но потребляет больше энергии. NPU спроектирован под инференс с фиксированной точностью, обеспечивает стабильную задержку <10 мс и низкое тепловыделение, что критично для embedded-систем и IoT-камер." },
+      { q: "4. Концепция вычислителей с массовым параллелизмом", theory: "Основана на модели SIMD/SIMT: одна инструкция выполняется над множеством потоков/данных. Практически реализуется в GPU-кластерах, суперкомпьютерах и распределённых системах обучения.", task: "Разработайте концепцию параллельной свёртки массива из 10⁸ элементов на GPU.", solution: "1) Разбить массив на блоки по 256 потоков. 2) В каждом потоке читать элемент и записывать в локальную память. 3) Использовать tree-based reduction: пары потоков суммируют результаты в общей памяти. 4) Повторять log₂(N) шагов. Итог: сложность O(log N) вместо O(N)." },
+      { q: "5. Преимущества матричных процессоров для ИИ", theory: "Матричные процессоры (TPU, матричные ускорители) используют систолические массивы: данные протекают через фиксированную сетку вычислительных ячеек, минимизируя обращения к памяти.", task: "Объясните, почему систолический массив ускоряет умножение матриц по сравнению со скалярным процессором.", solution: "В скалярном процессоре каждая операция требует загрузки из памяти и записи результата. В систолическом массиве данные поступают потоком, умножаются и накапливаются внутри массива без промежуточной записи. Пропускная способность ограничена тактовой частотой, а не шиной памяти, что даёт ускорение в 10–100× для GEMM." }
+    ]
+  },
+  {
+    id: 2, title: "Презентация 2: Архитектура и программирование GPU",
+    questions: [
+      { q: "6. Нейроморфные процессоры: архитектура и применение", theory: "Моделируют биологические нейронные сети через импульсные нейроны (SNN). Используют событийную логику, асинхронные вычисления и сверхнизкое энергопотребление.", task: "Опишите, как нейроморфный чип обрабатывает сигнал от камеры событийного типа (DVS).", solution: "DVS генерирует импульсы только при изменении освещённости. Нейроморфный процессор принимает эти импульсы как входные спайки, обрабатывает их через мембранную модель нейрона и формирует выходные спайки. Отсутствие тактового сигнала и статической памяти снижает энергопотребление на 2–3 порядка по сравнению с классическими GPU." },
+      { q: "7. Эффективность GPU для параллельных вычислений в ИИ", theory: "GPU обладает высокой пропускной способностью памяти (HBM/GDDR6), тысячами вычислительных ядер и специализированными тензорными ядрами. Оптимален для data-parallel задач.", task: "Рассчитайте, является ли операция свёртки 3×3 на изображении 4K memory-bound или compute-bound.", solution: "Для одного выхода требуется 9 чтений и 1 запись. При FP32 это ~40 байт на 1 операцию с плавающей точкой. Если соотношение байт/операция > 10–15, задача memory-bound. Свёртка обычно memory-bound, поэтому оптимизация достигается через shared memory и свёрточные ядра с минимизацией глобальных обращений." },
+      { q: "8. Сравнение OpenCL и CUDA", theory: "CUDA – проприетарный стек NVIDIA, максимальная производительность, экосистема библиотек. OpenCL – кроссплатформенный стандарт, работает на AMD/Intel/CPU, но сложнее в отладке и оптимизации.", task: "Выберите платформу для лаборатории, где используются GPU NVIDIA и AMD.", solution: "Для прототипирования и кросс-совместимости: OpenCL или SYCL. Для production-обучения нейросетей и использования cuDNN/cuBLAS: CUDA. Решение: гибридный стек (OpenCL для универсальных задач, CUDA для ИИ-пайплайнов) или переход на ROCm/SYCL при миграции." },
+      { q: "9. Kernel-based программирование", theory: "Ядро (kernel) – функция, выполняемая на устройстве. Запускается в иерархии: grid → block → thread. Позволяет явно управлять параллелизмом.", task: "Напишите концептуальный CUDA-код для поэлементного сложения двух векторов.", solution: "__global__ void vecAdd(float* A, float* B, float* C, int n) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < n) C[i] = A[i] + B[i];\n}\n// Запуск: vecAdd<<<(n+255)/256, 256>>>(d_A, d_B, d_C, n);\nОбъяснение: Каждый поток обрабатывает один индекс, проверка границы предотвращает выход за массив." },
+      { q: "10. Программные стеки параллельных вычислений", theory: "Стек включает: драйвер устройства → runtime (CUDA/OpenCL) → библиотеки (cuBLAS, MKL) → фреймворки (PyTorch, TensorFlow). Каждый уровень абстрагирует низкоуровневую оптимизацию.", task: "Проследите путь выполнения операции torch.matmul() до GPU.", solution: "1) PyTorch вызывает ATen-обёртку. 2) ATen формирует дескрипторы тензоров. 3) Вызывается cuBLAS/cuDNN через CUDA driver API. 4) Компилятор PTX → SASS (бинарный код для конкретной архитектуры). 5) Драйвер загружает бинарник в VRAM и запускает kernel." }
+    ]
+  },
+  {
+    id: 3, title: "Презентация 3: Библиотеки и оптимизация",
+    questions: [
+      { q: "11. Популярные библиотеки для параллельных вычислений", theory: "cuBLAS (линейная алгебра), cuDNN (нейросети), OpenMPI (распределённые вычисления), oneMKL (кроссплатформенная математика). Ускоряют типовые операции в 10–100×.", task: "Обоснуйте выбор библиотек для обучения ResNet-50 на кластере GPU.", solution: "cuDNN для свёрток и пулинга, cuBLAS для полносвязных слоёв, NCCL для AllReduce между узлами, PyTorch Distributed для оркестрации. Такой стек обеспечивает максимальную утилизацию Tensor Cores и минимизирует накладные расходы на синхронизацию." },
+      { q: "12. Ускорение ML специализированным оборудованием", theory: "ASIC/TPU, FPGA и Tensor Cores позволяют выполнять операции с пониженной точностью (FP16, INT8, BF16) с аппаратным масштабированием и конвейеризацией.", task: "Оцените выигрыш от перехода с FP32 на INT8 при инференсе BERT.", solution: "INT8 уменьшает объём памяти в 4×, пропускная способность Tensor Cores увеличивается в 2–3×. Точность падает <1% при Quantization-Aware Training. Итог: ускорение инференса в 2.5–4× при снижении энергопотребления на ~30%." },
+      { q: "13. Преимущества GPU перед CPU для задач ML", theory: "Массовый параллелизм, высокая пропускная способность памяти, аппаратные матричные ускорители, оптимизированные драйверы и экосистема фреймворков.", task: "Проведите мысленный бенчмарк: инференс LSTM vs Transformer на CPU и GPU.", solution: "LSTM имеет последовательную зависимость, поэтому ускорение на GPU умеренное (2–5×). Transformer полностью параллелизуем по токенам и головам внимания, ускорение достигает 15–30×. Вывод: GPU наиболее эффективен для архитектур с data-level parallelism." },
+      { q: "14. Архитектура современных GPU", theory: "Состоит из Streaming Multiprocessors (SM), каждый содержит CUDA-ядра, Tensor Cores, shared memory, регистровые файлы. Соединяются через NVLink/HBM2e.", task: "Объясните, как SM скрывает задержку доступа к памяти.", solution: "Каждый SM поддерживает сотни активных warps. Когда один warp ожидает данные из глобальной памяти, планировщик мгновенно переключается на другой готовый warp. Это latency hiding достигается за счёт избыточного параллелизма и быстрой смены контекста внутри SM." },
+      { q: "15. Трудности разработки ПО для GPU", theory: "Сложность отладки, управление памятью, синхронизация потоков, оптимизация occupancy, аппаратные ограничения (размер shared memory, лимит регистров).", task: "Найдите причину падения производительности при использовании атомарных операций в kernel.", solution: "Атомарные операции (atomicAdd) сериализуют доступ к памяти, превращая параллельный код в последовательный. Решение: использовать приватные аккумуляторы в регистрах/shared memory, а затем выполнять атомарное сложение один раз на блок/поток." }
+    ]
+  },
+  {
+    id: 4, title: "Презентация 4: Управление памятью и SIMT",
+    questions: [
+      { q: "16. Функции cuDNN и cuBLAS", theory: "cuDNN оптимизирует свёртки, пулинг, RNN, нормализацию. cuBLAS реализует BLAS-уровни 1–3 (векторы, матрицы, GEMM). Обе используют Tensor Cores.", task: "Покажите, как cuDNN ускоряет прямое распространение свёрточного слоя.", solution: "1) Выбирает оптимальный алгоритм (имплицитный GEMM, FFT, Winograd) через автопоиск. 2) Формирует дескрипторы тензоров. 3) Запускает оптимизированный kernel с минимизацией bank conflicts в shared memory. 4) Возвращает результат через асинхронные очереди." },
+      { q: "17. Распределение нагрузки между ядрами GPU", theory: "Зависит от grid/block size, occupancy, выравнивания по warp (32 потока), использования streams для асинхронности.", task: "Подберите размер блока для матричного умножения 4096×4096.", solution: "Оптимально: blockDim = (16, 16) или (32, 8). Оба дают 256 потоков/блок. Кратность 32 гарантирует полный warp. Обеспечивает высокую occupancy (~75%) и минимизирует регистровое давление." },
+      { q: "18. Концепция SIMT и воплощение в GPU", theory: "Single Instruction, Multiple Threads: один warp (32 потока) выполняет одну инструкцию. Если потоки ветвятся, происходит serial execution (divergence).", task: "Продемонстрируйте влияние branch divergence на производительность.", solution: "Код: if (threadIdx.x < 16) { A = B * 2; } else { A = B + 2; }\nПервые 16 потоков выполнят умножение, остальные ждут. Затем выполнят сложение. Производительность падает в 2×. Решение: restructuring логики, использование warp-level primitives или маскирование." },
+      { q: "19. Управление памятью в параллельных вычислениях", theory: "Иерархия: регистры → shared memory → constant/texture → global (VRAM). Ключ к оптимизации: coalesced access и тилирование.", task: "Оптимизируйте чтение матрицы из глобальной памяти в kernel.", solution: "1) Выровнить данные по 128 байт. 2) Использовать shared memory для загрузки подблока (tiling). 3) Читать последовательно (stride=1) для коалесцирования. 4) Избегать bank conflicts через padding. Результат: снижение latency на 60–80%." },
+      { q: "20. Повышение эффективности параллельного программирования", theory: "Kernel fusion, mixed precision, asynchronous copy, profiling (Nsight), устранение false sharing, использование Tensor Cores.", task: "Предложите план профилирования медленного kernel.", solution: "1) Запустить Nsight Compute. 2) Проверить: occupancy, memory throughput, warp stall reasons. 3) Если memory-bound → tiled load, coalescing. 4) Если compute-bound → Tensor Cores, FP16/BF16. 5) Fusion смежных kernel'ов для снижения overhead запуска." }
+    ]
+  },
+  {
+    id: 5, title: "Презентация 5: Системная интеграция и перспективы",
+    questions: [
+      { q: "21. Взаимодействие CPU и GPU в единой системе", theory: "Обмен через PCIe/NVLink. Host управляет памятью, запускает kernels, обрабатывает последовательную логику. Device выполняет массовые вычисления.", task: "Спроектируйте pipeline для real-time инференса видеоаналитики.", solution: "1) CPU захватывает кадр → pinned memory. 2) Асинхронный cudaMemcpyAsync в VRAM. 3) GPU запускает inference kernel. 4) Результат копируется обратно. 5) CPU пост-обрабатывает и выводит. Использование streams и CUDA events минимизирует простои." },
+      { q: "22. Факторы выбора CPU vs GPU для задач ИИ", theory: "Зависит от: размера данных, параллелизма, бюджета, энергопотребления, задержки, экосистемы фреймворков.", task: "Составьте матрицу выбора для edge-дрона и облачного дата-центра.", solution: "Edge-дрон: CPU/NPU (низкое энергопотребление, детерминированная задержка, ограниченная масса). Дата-центр: GPU/TPU кластер (высокая пропускная способность, масштабируемость, обучение больших моделей). Критерии: FLOPS/W, latency, cost/training hour." },
+      { q: "23. Ограничения GPU и пути обхода", theory: "Лимит VRAM, PCIe bottleneck, single precision overhead, тепловыделение, сложность отладки.", task: "Как решить OOM-ошибку при обучении LLM на одной GPU?", solution: "1) Gradient Checkpointing (trade-off memory/compute). 2) Mixed Precision (FP16/BF16). 3) ZeRO-optimization (partition optimizer states). 4) Data/Model Parallelism. 5) Offload в CPU RAM (DeepSpeed). Комбинация снижает потребление VRAM на 60–80%." },
+      { q: "24. Потенциал FPGA в системах ИИ", theory: "Программируемые логические матрицы позволяют создавать кастомные конвейеры, обеспечивают низкую детерминированную задержку, энергоэффективность, аппаратную безопасность.", task: "Сравните FPGA и GPU для потоковой обработки финансовых сигналов.", solution: "FPGA: задержка <1 мкс, фиксированная пропускная способность, низкое энергопотребление, сложность разработки (HLS/Verilog). GPU: задержка ~0.1–1 мс, гибкость, высокая пиковая производительность, но джиттер из-за ОС и планировщика. Для HFT предпочтительнее FPGA." },
+      { q: "25. Перспективные направления развития вычислительной техники для ИИ", theory: "Оптические нейросети, 3D-стекирование памяти (HBM4), квантово-классические гибриды, нейроморфные чипы 2-го поколения, фотонные интерконнекты.", task: "Оцените влияние оптических вычислений на энергоэффективность ИИ.", solution: "Оптические матричные умножения выполняются за счёт интерференции света, потребляя ~фДж/операцию против ~пДж у CMOS. Это снижает тепловыделение на 2–3 порядка и позволяет создавать системы с эксафлопсной производительностью без криогенного охлаждения. Основной барьер: точность и интеграция с классической логикой." }
+    ]
+  }
+];
+
+const main = document.getElementById('main');
+const nav = document.getElementById('nav');
+
+function renderPresentations() {
+  data.forEach(p => {
+    const pres = document.createElement('div');
+    pres.className = 'presentation';
+    pres.id = `pres${p.id}`;
+    if(p.id === 1) pres.classList.add('active');
+    
+    let html = `<h2 style="margin-bottom:1.2rem; color:#0f172a;">${p.title}</h2><div class="q-grid">`;
+    p.questions.forEach((item, idx) => {
+      html += `
+      <div class="card">
+        <div class="card-header">Вопрос ${idx+1}: ${item.q}</div>
+        <div class="card-body">
+          <button class="toggle-btn" onclick="toggle('theory-${p.id}-${idx}')">📖 Теория</button>
+          <div id="theory-${p.id}-${idx}" class="content-block">
+            <div class="section-title">Конспект:</div>
+            <p>${item.theory.replace(/\n/g, '<br>')}</p>
+          </div>
+          <button class="toggle-btn" style="margin-left:0.5rem;" onclick="toggle('task-${p.id}-${idx}')">📝 Задача</button>
+          <div id="task-${p.id}-${idx}" class="content-block">
+            <div class="section-title">Практическое задание:</div>
+            <p style="font-style:italic; background:#f8fafc; padding:0.6rem; border-radius:6px; border:1px dashed #cbd5e1;">${item.task}</p>
+          </div>
+          <button class="toggle-btn" style="background:#ecfdf5; border-color:#10b981; color:#065f46;" onclick="toggle('sol-${p.id}-${idx}')">✅ Решение</button>
+          <div id="sol-${p.id}-${idx}" class="content-block">
+            <div class="solution">${item.solution.replace(/\n/g, '<br>')}</div>
+          </div>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+    pres.innerHTML = html;
+    main.appendChild(pres);
+  });
+}
+
+function toggle(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+nav.addEventListener('click', e => {
+  if(e.target.tagName !== 'BUTTON') return;
+  const presId = e.target.dataset.pres;
+  showSlide(parseInt(presId));
+});
+
+function showSlide(slideNum) {
+  document.querySelectorAll('.presentation').forEach(p => p.classList.remove('active'));
+  document.getElementById(`pres${slideNum}`).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.querySelector(`nav button[data-pres="${slideNum}"]`).classList.add('active');
+  
+  document.getElementById('slideIndicator').textContent = `${slideNum} / ${data.length}`;
+  
+  document.getElementById('prevBtn').disabled = slideNum === 1;
+  document.getElementById('nextBtn').disabled = slideNum === data.length;
+}
+
+function prevSlide() {
+  const currentSlide = parseInt(document.querySelector('nav button.active').dataset.pres);
+  if (currentSlide > 1) {
+    showSlide(currentSlide - 1);
+  }
+}
+
+function nextSlide() {
+  const currentSlide = parseInt(document.querySelector('nav button.active').dataset.pres);
+  if (currentSlide < data.length) {
+    showSlide(currentSlide + 1);
+  }
+}
+
+renderPresentations();
+showSlide(1);
+</script>
+</body>
+</html>

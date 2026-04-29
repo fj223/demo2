@@ -104,6 +104,17 @@ def is_url(source: str) -> bool:
     return parsed.scheme in ('http', 'https', 'file')
 
 
+def detect_html_type(page) -> str:
+    """Detect the type of HTML presentation: 'slide' or 'qa' (question-answer)."""
+    # Check for traditional slides
+    if page.locator('.slide').count() > 0:
+        return 'slide'
+    # Check for Q&A style presentations (GPU.html, etc.)
+    if page.locator('.presentation').count() > 0 or page.locator('.card').count() > 0:
+        return 'qa'
+    return 'unknown'
+
+
 def extract_slide_data(source: str) -> list:
     """Extract slide text content and formatting from an HTML presentation loaded in a browser."""
     url = source
@@ -121,7 +132,180 @@ def extract_slide_data(source: str) -> list:
         page.goto(url)
         page.wait_for_load_state('networkidle')
 
-        slide_data = page.evaluate(r'''() => {
+        # Detect HTML type: 'slide' or 'qa' (question-answer)
+        has_slides = page.locator('.slide').count() > 0
+        has_cards = page.locator('.card').count() > 0
+        has_presentations = page.locator('.presentation').count() > 0
+        
+        if has_cards or has_presentations:
+            # Q&A style presentation (GPU.html, etc.)
+            # First, expand all content blocks by adding force-open class
+            page.evaluate('''() => {
+                // Force all presentations to be visible
+                document.querySelectorAll('.presentation').forEach(pres => {
+                    pres.style.display = 'block';
+                    pres.style.visibility = 'visible';
+                    pres.style.opacity = '1';
+                });
+
+                // Add force-open class to all content blocks
+                document.querySelectorAll('.content-block').forEach(block => {
+                    block.classList.add('force-open');
+                });
+            }''')
+            page.wait_for_timeout(1000)  # Wait for animations to complete
+            
+            # Now extract the expanded content
+            slide_data = page.evaluate(r'''() => {
+                const result = [];
+                
+                // Get all presentation sections
+                const presentations = Array.from(document.querySelectorAll('.presentation'));
+                
+                presentations.forEach((pres, presIdx) => {
+                    // Get presentation title
+                    const presTitle = pres.querySelector('h2');
+                    const presTitleText = presTitle ? presTitle.textContent.trim() : `Presentation ${presIdx + 1}`;
+                    
+                    // Create title slide for each presentation
+                    result.push({
+                        rect: { width: 1920, height: 1080 },
+                        backgroundColor: '#ffffff',
+                        blocks: [{
+                            rect: { x: 50, y: 400, width: 1820, height: 280 },
+                            type: 'header',
+                            elements: [{
+                                tag: 'h1',
+                                align: 'center',
+                                list: false,
+                                segments: [{ text: presTitleText, fontSize: '32px', fontWeight: '700', color: '#1e40af' }]
+                            }],
+                            backgroundColor: '#f8fafc',
+                            borderLeftWidth: 0,
+                            borderLeftColor: null,
+                            borderBottomWidth: 4,
+                            borderBottomColor: '#2563eb'
+                        }]
+                    });
+                    
+                    // Get all cards in this presentation
+                    const cards = Array.from(pres.querySelectorAll('.card'));
+                    
+                    cards.forEach((card, cardIdx) => {
+                        const cardBlocks = [];
+                        
+                        // Get card header (question)
+                        const header = card.querySelector('.card-header');
+                        if (header) {
+                            cardBlocks.push({
+                                rect: { x: 50, y: 30, width: 1820, height: 100 },
+                                type: 'header',
+                                elements: [{
+                                    tag: 'h2',
+                                    align: 'left',
+                                    list: false,
+                                    segments: [{ text: header.textContent.trim(), fontSize: '18px', fontWeight: '700', color: '#0f172a' }]
+                                }],
+                                backgroundColor: '#f1f5f9',
+                                borderLeftWidth: 0,
+                                borderLeftColor: null,
+                                borderBottomWidth: 3,
+                                borderBottomColor: '#2563eb'
+                            });
+                        }
+                        
+                        // Get all content blocks (theory, task, solution)
+                        const contentBlocks = Array.from(card.querySelectorAll('.content-block'));
+                        
+                        contentBlocks.forEach((block, blockIdx) => {
+                            // Check if block has force-open class or is visible
+                            const hasForceOpen = block.classList.contains('force-open');
+                            const style = window.getComputedStyle(block);
+                            if (!hasForceOpen && style.display === 'none' && block.style.display !== 'block') return;
+                            
+                            const sectionTitle = block.querySelector('.section-title');
+                            const content = block.querySelector('p');
+                            const solutionDiv = block.querySelector('.solution');
+                            
+                            let titleText = '';
+                            let contentText = '';
+                            let tag = 'p';
+                            let bgColor = '#ffffff';
+                            let borderColor = '#667eea';
+                            
+                            if (sectionTitle) {
+                                titleText = sectionTitle.textContent.trim();
+                            }
+                            
+                            if (solutionDiv) {
+                                contentText = solutionDiv.textContent.trim();
+                                tag = 'h3';
+                                bgColor = '#ecfdf5';
+                                borderColor = '#10b981';
+                            } else if (content) {
+                                contentText = content.textContent.trim();
+                                if (titleText.includes('Теория') || titleText.includes('Конспект')) {
+                                    tag = 'h3';
+                                    bgColor = '#f0f9ff';
+                                    borderColor = '#2563eb';
+                                } else if (titleText.includes('Задача') || titleText.includes('Практич')) {
+                                    tag = 'h3';
+                                    bgColor = '#fffbeb';
+                                    borderColor = '#f59e0b';
+                                }
+                            }
+                            
+                            if (contentText && titleText) {
+                                // Create separate slide for each content block
+                                const paragraphs = contentText.split(/\n\n|\n/).filter(p => p.trim());
+                                const elements = [];
+                                
+                                // Add section title
+                                elements.push({
+                                    tag: 'h3',
+                                    align: 'left',
+                                    list: false,
+                                    segments: [{ text: titleText, fontSize: '16px', fontWeight: '600', color: '#1e40af' }]
+                                });
+                                
+                                // Add content paragraphs
+                                paragraphs.forEach((para, paraIdx) => {
+                                    elements.push({
+                                        tag: 'p',
+                                        align: 'left',
+                                        list: para.match(/^\d+[\)\.]\s/) !== null,
+                                        segments: [{ 
+                                            text: para.trim(), 
+                                            fontSize: '14px', 
+                                            fontWeight: '400', 
+                                            color: '#334155' 
+                                        }]
+                                    });
+                                });
+                                
+                                // Create separate slide for this content block
+                                result.push({
+                                    rect: { width: 1920, height: 1080 },
+                                    backgroundColor: '#ffffff',
+                                    blocks: [{
+                                        rect: { x: 50, y: 30, width: 1820, height: Math.min(1020, Math.max(200, elements.length * 70)) },
+                                        type: 'content',
+                                        elements: elements,
+                                        backgroundColor: bgColor,
+                                        borderLeftWidth: 5,
+                                        borderLeftColor: borderColor
+                                    }]
+                                });
+                            }
+                        });
+                    });
+                });
+                
+                return result;
+            }''')
+        else:
+            # Traditional slide presentation
+            slide_data = page.evaluate(r'''() => {
             const wrapper = document.querySelector('.presentation-wrapper') || document.body;
             const slides = Array.from(document.querySelectorAll('.slide'));
             const originalClasses = slides.map(slide => slide.className);
@@ -250,20 +434,22 @@ def extract_slide_data(source: str) -> list:
                 slide.scrollIntoView({ behavior: 'instant', block: 'center', inline: 'center' });
             }
 
-function shouldUseBlock(el) {
-                    return !el.matches('.slide-number, .language-bar, .progress-bar, .nav-btn, .lang-btn') && el.textContent.trim();
-                }
+            function shouldUseBlock(el) {
+                return !el.matches('.slide-number, .language-bar, .progress-bar, .nav-btn, .lang-btn') && el.textContent.trim();
+            }
 
-                const result = slides.map(slide => {
-                    showSlide(slide);
-                    const slideRect = slide.getBoundingClientRect();
-                    const blocks = [];
-                    const blockSelectors = [
+            const result = slides.map(slide => {
+                showSlide(slide);
+                const slideRect = slide.getBoundingClientRect();
+                const blocks = [];
+                const blockSelectors = [
                         ':scope > .slide-header',
                         ':scope > .header',
                         ':scope > .content-box',
                         ':scope .content-box',
                         ':scope .card',
+                        ':scope .card-header',
+                        ':scope .card-body',
                         ':scope > .box',
                         ':scope .box',
                         ':scope > .content-ru.active',
@@ -272,6 +458,10 @@ function shouldUseBlock(el) {
                         ':scope .content-ru.active',
                         ':scope .content-en.active',
                         ':scope .content-zh.active',
+                        ':scope > .presentation',
+                        ':scope .presentation',
+                        ':scope > .content-block',
+                        ':scope .content-block',
                         ':scope > h1',
                         ':scope > h2',
                         ':scope > h3',
@@ -289,11 +479,12 @@ function shouldUseBlock(el) {
                         ':scope .h6',
                         ':scope .p',
                         ':scope .ul',
-                        ':scope .ol'
+                        ':scope .ol',
+                        ':scope .q-grid'
                     ];
-                    blockSelectors.forEach(selector => {
-                        Array.from(slide.querySelectorAll(selector)).forEach(el => {
-                            if (shouldUseBlock(el) && !blocks.includes(el)) {
+                blockSelectors.forEach(selector => {
+                    Array.from(slide.querySelectorAll(selector)).forEach(el => {
+                        if (shouldUseBlock(el) && !blocks.includes(el)) {
                             blocks.push(el);
                         }
                     });
@@ -329,7 +520,7 @@ function shouldUseBlock(el) {
         browser.close()
 
     if not slide_data:
-        raise ValueError('No slides found using .slide selector')
+        raise ValueError('No slides found in the HTML file')
     return slide_data
 
 
