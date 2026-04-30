@@ -11,3 +11,7 @@ python-pptx==1.0.2
 
 # 剪贴板操作库 - 用于从剪贴板读取文本（可选）
 pyperclip==1.8.2
+
+# HTML解析库 - 用于提取文本内容
+beautifulsoup4==4.12.3
+lxml==5.1.0

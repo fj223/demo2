@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit тестирование на Python</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+        :root {
+            --primary: #306998;
+            --secondary: #FFD43B;
+            --accent: #4B8BBE;
+            --dark: #1e1e1e;
+            --light: #f5f5f5;
+            --code-bg: #2d2d2d;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 80px;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            z-index: 10;
+        }
+
+        .slide.prev {
+            transform: translateX(-100px);
+            opacity: 0;
+        }
+
+        /* 16:9 Aspect Ratio Container */
+        .slide-content {
+            width: 100%;
+            max-width: 1400px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        h3 {
+            font-size: 1.8rem;
+            color: var(--accent);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: #666;
+            margin-bottom: 3rem;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 2rem;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            color: #f8f8f2;
+            padding: 25px;
+            border-radius: 10px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin: 1rem 0;
+        }
+
+        .code-block .comment { color: #75715e; }
+        .code-block .keyword { color: #f92672; }
+        .code-block .function { color: #66d9ef; }
+        .code-block .string { color: #e6db74; }
+        .code-block .number { color: #ae81ff; }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li {
+            padding: 12px 0;
+            padding-left: 35px;
+            position: relative;
+            font-size: 1.3rem;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--secondary);
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .highlight-box h3 {
+            color: white;
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 1.1rem;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 5px;
+        }
+
+        .badge-pytest {
+            background: #009fe3;
+            color: white;
+        }
+
+        .badge-unittest {
+            background: #306998;
+            color: white;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 1000;
+            background: rgba(255,255,255,0.9);
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .nav-btn:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 5px;
+            background: var(--secondary);
+            transition: width 0.3s;
+            z-index: 1001;
+        }
+
+        .slide-number {
+            position: fixed;
+            top: 30px;
+            right: 40px;
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.8);
+            font-weight: 600;
+            z-index: 1000;
+        }
+
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: start;
+        }
+
+        .folder-structure {
+            font-family: 'Fira Code', monospace;
+            background: var(--code-bg);
+            color: #f8f8f2;
+            padding: 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        .folder-structure .folder { color: #66d9ef; }
+        .folder-structure .file { color: #e6db74; }
+        .folder-structure .comment { color: #75715e; }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .slide {
+                opacity: 1 !important;
+                transform: none !important;
+                page-break-after: always;
+                position: relative;
+                height: 100vh;
+            }
+            .navigation, .progress-bar, .slide-number {
+                display: none;
+            }
+        }
+
+        @media screen and (max-width: 1024px) {
+            .content-grid, .two-column {
+                grid-template-columns: 1fr;
+            }
+            h1 { font-size: 2.5rem; }
+            h2 { font-size: 2rem; }
+        }
+
+        .emoji {
+            font-size: 1.2em;
+        }
+
+        .command {
+            background: #f0f0f0;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-family: 'Fira Code', monospace;
+            color: var(--primary);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+    <div class="slide-number" id="slideNumber">1 / 13</div>
+
+    <div class="presentation">
+        <!-- Slide 1: Title -->
+        <div class="slide active" data-slide="0">
+            <div class="slide-content" style="text-align: center;">
+                <div class="icon">🐍</div>
+                <h1>Unit тестирование на Python</h1>
+                <p class="subtitle">Полное руководство по тестированию кода</p>
+                <div style="margin-top: 40px; padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px; display: inline-block;">
+                    <p style="font-size: 1.3rem; margin: 0;">От unittest до pytest</p>
+                    <p style="font-size: 1.1rem; margin-top: 10px; opacity: 0.9;">Мокирование • Покрытие • Лучшие практики</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: What is Unit Testing -->
+        <div class="slide" data-slide="1">
+            <div class="slide-content">
+                <h2><span class="emoji">🎯</span> Что такое Unit тестирование?</h2>
+                <div class="highlight-box">
+                    <h3>Определение</h3>
+                    <p style="font-size: 1.3rem; line-height: 1.6;">Проверка корректности работы отдельных функций, методов или классов <strong>в изоляции</strong> от остальной системы</p>
+                </div>
+                <div class="content-grid">
+                    <div>
+                        <h3>Цели тестирования</h3>
+                        <ul>
+                            <li>Обнаружение ошибок на ранних этапах</li>
+                            <li>Упрощение рефакторинга кода</li>
+                            <li>Документирование поведения кода</li>
+                            <li>Повышение качества разработки</li>
+                            <li>Автоматизация проверки функционала</li>
+                        </ul>
+                    </div>
+                    <div class="code-block">
+<span class="comment"># Пример: тестируем функцию сложения</span>
+<span class="keyword">def</span> <span class="function">add</span>(a, b):
+    <span class="keyword">return</span> a + b
+
+<span class="comment"># Тест проверяет:</span>
+<span class="comment"># 1. Корректность результата</span>
+<span class="comment"># 2. Обработку граничных случаев</span>
+<span class="comment"># 3. Типы возвращаемых данных</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Frameworks -->
+        <div class="slide" data-slide="2">
+            <div class="slide-content">
+                <h2><span class="emoji">🛠</span> Основные фреймворки</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Фреймворк</th>
+                            <th>Особенности</th>
+                            <th>Когда использовать</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge badge-unittest">unittest</span></td>
+                            <td>
+                                • Встроен в стандартную библиотеку<br>
+                                • Синтаксис в стиле JUnit<br>
+                                • Требует наследования от TestCase
+                            </td>
+                            <td>Легаси проекты, среда без pip</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-pytest">pytest</span></td>
+                            <td>
+                                • Сторонний (pip install pytest)<br>
+                                • Де-факто стандарт<br>
+                                • Проще и мощнее
+                            </td>
+                            <td><strong>Новые проекты (рекомендуется)</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="highlight-box" style="margin-top: 30px;">
+                    <h3>💡 Рекомендация</h3>
+                    <p style="font-size: 1.2rem;">Используйте <strong>pytest</strong> для новых проектов. Он проще в освоении, имеет богатую экосистему плагинов и требует меньше кода для написания тестов.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Example Code -->
+        <div class="slide" data-slide="3">
+            <div class="slide-content">
+                <h2><span class="emoji">📝</span> Пример кода для тестирования</h2>
+                <p class="subtitle">Файл: <span class="command">math_ops.py</span></p>
+                <div class="two-column">
+                    <div class="code-block">
+<span class="keyword">def</span> <span class="function">add</span>(a, b):
+    <span class="keyword">return</span> a + b
+
+<span class="keyword">def</span> <span class="function">divide</span>(a, b):
+    <span class="keyword">if</span> b == <span class="number">0</span>:
+        <span class="keyword">raise</span> ValueError(<span class="string">"Деление на ноль"</span>)
+    <span class="keyword">return</span> a / b
+
+<span class="keyword">def</span> <span class="function">multiply</span>(a, b):
+    <span class="keyword">return</span> a * b
+                    </div>
+                    <div>
+                        <h3>Что тестируем?</h3>
+                        <ul>
+                            <li><strong>add()</strong> - сложение чисел</li>
+                            <li><strong>divide()</strong> - деление с проверкой на ноль</li>
+                            <li><strong>multiply()</strong> - умножение</li>
+                        </ul>
+                        <div class="highlight-box" style="margin-top: 30px;">
+                            <h3> Сценарии тестирования</h3>
+                            <ul style="margin-top: 15px;">
+                                <li>Позитивные числа</li>
+                                <li>Отрицательные числа</li>
+                                <li>Нулевые значения</li>
+                                <li>Исключения (деление на 0)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Pytest Tests -->
+        <div class="slide" data-slide="4">
+            <div class="slide-content">
+                <h2><span class="emoji">🧪</span> Тесты через pytest</h2>
+                <p class="subtitle">Файл: <span class="command">test_math_ops.py</span></p>
+                <div class="code-block" style="font-size: 0.85rem;">
+<span class="keyword">import</span> pytest
+<span class="keyword">from</span> math_ops <span class="keyword">import</span> add, divide
+
+<span class="keyword">def</span> <span class="function">test_add</span>():
+    <span class="keyword">assert</span> add(<span class="number">2</span>, <span class="number">3</span>) == <span class="number">5</span>
+    <span class="keyword">assert</span> add(<span class="number">-1</span>, <span class="number">1</span>) == <span class="number">0</span>
+    <span class="keyword">assert</span> add(<span class="number">0</span>, <span class="number">0</span>) == <span class="number">0</span>
+
+<span class="keyword">def</span> <span class="function">test_divide</span>():
+    <span class="keyword">assert</span> divide(<span class="number">10</span>, <span class="number">2</span>) == <span class="number">5.0</span>
+    <span class="keyword">assert</span> divide(<span class="number">7</span>, <span class="number">3</span>) == pytest.approx(<span class="number">2.3333333</span>)
+
+<span class="keyword">def</span> <span class="function">test_divide_by_zero</span>():
+    <span class="keyword">with</span> pytest.raises(ValueError, match=<span class="string">"Деление на ноль"</span>):
+        divide(<span class="number">5</span>, <span class="number">0</span>)
+                </div>
+                <div class="highlight-box" style="margin-top: 20px;">
+                    <h3>✨ Преимущества pytest</h3>
+                    <ul style="margin-top: 10px; font-size: 1.1rem;">
+                        <li>Обычный <code>assert</code> (не нужны специальные методы)</li>
+                        <li>Не нужно создавать классы</li>
+                        <li>Автоматическое раскрытие выражений при ошибке</li>
+                        <li>Поддержка фикстур и параметризации</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Unittest Tests -->
+        <div class="slide" data-slide="5">
+            <div class="slide-content">
+                <h2><span class="emoji">🧪</span> Тесты через unittest</h2>
+                <p class="subtitle">Традиционный подход (встроен в Python)</p>
+                <div class="code-block" style="font-size: 0.85rem;">
+<span class="keyword">import</span> unittest
+<span class="keyword">from</span> math_ops <span class="keyword">import</span> add, divide
+
+<span class="keyword">class</span> <span class="function">TestMathOps</span>(unittest.TestCase):
+    <span class="keyword">def</span> <span class="function">test_add</span>(self):
+        self.assertEqual(add(<span class="number">2</span>, <span class="number">3</span>), <span class="number">5</span>)
+        self.assertEqual(add(<span class="number">-1</span>, <span class="number">1</span>), <span class="number">0</span>)
+    
+    <span class="keyword">def</span> <span class="function">test_divide</span>(self):
+        self.assertAlmostEqual(divide(<span class="number">7</span>, <span class="number">3</span>), <span class="number">2.3333333</span>, places=<span class="number">5</span>)
+    
+    <span class="keyword">def</span> <span class="function">test_divide_by_zero</span>(self):
+        <span class="keyword">with</span> self.assertRaises(ValueError):
+            divide(<span class="number">5</span>, <span class="number">0</span>)
+
+<span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:
+    unittest.main()
+                </div>
+                <div class="content-grid" style="margin-top: 20px;">
+                    <div class="highlight-box" style="background: #ff6b6b;">
+                        <h3>⚠️ Недостатки</h3>
+                        <ul style="margin-top: 10px;">
+                            <li>Многословный синтаксис</li>
+                            <li>Обязательное наследование</li>
+                            <li>Специальные методы assert</li>
+                        </ul>
+                    </div>
+                    <div class="highlight-box" style="background: #51cf66;">
+                        <h3>✅ Преимущества</h3>
+                        <ul style="margin-top: 10px;">
+                            <li>Не требует установки</li>
+                            <li>Стандарт библиотеки</li>
+                            <li>Стабильность API</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Running Tests -->
+        <div class="slide" data-slide="6">
+            <div class="slide-content">
+                <h2><span class="emoji">🚀</span> Запуск тестов</h2>
+                <div class="two-column">
+                    <div>
+                        <h3>Команды pytest</h3>
+                        <div class="code-block">
+<span class="comment"># Все тесты в директории</span>
+pytest
+
+<span class="comment"># Подробный вывод</span>
+pytest -v
+
+<span class="comment"># Конкретный тест</span>
+pytest -k add
+
+<span class="comment"># С покрытием</span>
+pytest --cov=math_ops
+                        </div>
+                    </div>
+                    <div>
+                        <h3>Команды unittest</h3>
+                        <div class="code-block">
+<span class="comment"># Все тесты</span>
+python -m unittest discover
+
+<span class="comment"># Конкретный файл</span>
+python -m unittest test_math_ops
+
+<span class="comment"># С подробностями</span>
+python -m unittest -v
+                        </div>
+                    </div>
+                </div>
+                <div class="highlight-box" style="margin-top: 30px;">
+                    <h3>📊 Вывод pytest</h3>
+                    <div class="code-block" style="margin-top: 15px; background: #1e1e1e;">
+<span style="color: #51cf66;">test_math_ops.py</span> <span style="color: #51cf66;">...</span> <span style="color: #51cf66;">PASSED</span>
+<span style="color: #51cf66;">test_math_ops.py</span> <span style="color: #51cf66;">...</span> <span style="color: #51cf66;">PASSED</span>
+<span style="color: #ffd43b;">test_math_ops.py</span> <span style="color: #ffd43b;">...</span> <span style="color: #ffd43b;">SKIPPED</span>
+<span style="color: #ff6b6b;">test_math_ops.py</span> <span style="color: #ff6b6b;">...</span> <span style="color: #ff6b6b;">FAILED</span>
+
+<span style="color: #51cf66;">====== 2 passed, 1 skipped, 1 failed ======</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Mocking -->
+        <div class="slide" data-slide="7">
+            <div class="slide-content">
+                <h2><span class="emoji">🎭</span> Мокирование (Mocking)</h2>
+                <p class="subtitle">Изоляция от внешних зависимостей</p>
+                <div class="code-block">
+<span class="keyword">from</span> unittest.mock <span class="keyword">import</span> patch
+<span class="keyword">from</span> my_module <span class="keyword">import</span> fetch_data
+
+<span class="comment"># Декоратор для мокирования</span>
+@patch(<span class="string">'my_module.requests.get'</span>)
+<span class="keyword">def</span> <span class="function">test_fetch_data</span>(mock_get):
+    <span class="comment"># Настраиваем возвращаемое значение</span>
+    mock_get.return_value.json.return_value = {<span class="string">"status"</span>: <span class="string">"ok"</span>}
+    
+    result = fetch_data(<span class="string">"https://api.example.com"</span>)
+    
+    <span class="comment"># Проверяем результат</span>
+    <span class="keyword">assert</span> result == {<span class="string">"status"</span>: <span class="string">"ok"</span>}
+    
+    <span class="comment"># Проверяем вызов</span>
+    mock_get.assert_called_once_with(<span class="string">"https://api.example.com"</span>)
+                </div>
+                <div class="content-grid" style="margin-top: 20px;">
+                    <div class="highlight-box" style="background: #339af0;">
+                        <h3>🎯 Когда использовать</h3>
+                        <ul style="margin-top: 10px;">
+                            <li>HTTP-запросы (API)</li>
+                            <li>Работа с БД</li>
+                            <li>Файловая система</li>
+                            <li>Внешние сервисы</li>
+                            <li>Сложные вычисления</li>
+                        </ul>
+                    </div>
+                    <div class="highlight-box" style="background: #9775fa;">
+                        <h3>💡 pytest-mock</h3>
+                        <p style="margin-top: 10px;">Плагин <code>pytest-mock</code> предоставляет удобную фикстуру <code>mocker</code>:</p>
+                        <div class="code-block" style="margin-top: 10px; font-size: 0.9rem;">
+<span class="keyword">def</span> <span class="function">test_with_mocker</span>(mocker):
+    mocker.patch(<span class="string">'os.getcwd'</span>, return_value=<span class="string">'/tmp'</span>)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Code Coverage -->
+        <div class="slide" data-slide="8">
+            <div class="slide-content">
+                <h2><span class="emoji">📦</span> Покрытие кода (Coverage)</h2>
+                <div class="two-column">
+                    <div>
+                        <h3>Установка и запуск</h3>
+                        <div class="code-block">
+<span class="comment"># Установка</span>
+pip install coverage pytest-cov
+
+<span class="comment"># Запуск с покрытием</span>
+pytest --cov=math_ops --cov-report=term-missing
+
+<span class="comment"># HTML отчет</span>
+pytest --cov=math_ops --cov-report=html
+                        </div>
+                        <div class="highlight-box" style="margin-top: 20px;">
+                            <h3>📈 Целевые показатели</h3>
+                            <ul style="margin-top: 10px;">
+                                <li><strong>80%+</strong> - хороший уровень</li>
+                                <li><strong>90%+</strong> - отличный уровень</li>
+                                <li><strong>100%</strong> - не всегда нужен</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <h3>Пример отчета</h3>
+                        <div class="code-block" style="font-size: 0.9rem;">
+<span style="color: #51cf66;">Name          Stmts   Miss  Cover   Missing</span>
+<span style="color: #51cf66;">-----------------------------------------------</span>
+math_ops.py        15      2    87%   8, 12
+-----------------------------------------------
+TOTAL              15      2    87%
+
+<span style="color: #ffd43b;">Coverage HTML written to dir htmlcov</span>
+                        </div>
+                        <div class="highlight-box" style="margin-top: 20px; background: #ff922b;">
+                            <h3>⚠️ Важно</h3>
+                            <p style="margin-top: 10px;">Покрытие не гарантирует качество тестов! Тесты могут покрывать код, но не проверять корректность.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Best Practices -->
+        <div class="slide" data-slide="9">
+            <div class="slide-content">
+                <h2><span class="emoji">✅</span> Лучшие практики</h2>
+                <div class="content-grid">
+                    <div class="highlight-box" style="background: #40c057;">
+                        <h3>📋 Правила написания</h3>
+                        <ul style="margin-top: 15px;">
+                            <li>Один тест = один сценарий</li>
+                            <li>Читаемые имена тестов</li>
+                            <li>Тесты независимы</li>
+                            <li>Используйте фикстуры</li>
+                        </ul>
+                    </div>
+                    <div class="highlight-box" style="background: #339af0;">
+                        <h3>🎯 Что тестировать</h3>
+                        <ul style="margin-top: 15px;">
+                            <li>Happy path (успешные сценарии)</li>
+                            <li>Граничные случаи</li>
+                            <li>Обработку ошибок</li>
+                            <li>Типы входных данных</li>
+                        </ul>
+                    </div>
+                    <div class="highlight-box" style="background: #ffd43b; color: #333;">
+                        <h3>⚡ Производительность</h3>
+                        <ul style="margin-top: 15px;">
+                            <li>Держите тесты быстрыми</li>
+                            <li>Не используйте реальные БД/API</li>
+                            <li>Мокайте внешние зависимости</li>
+                            <li>Параллельный запуск (pytest-xdist)</li>
+                        </ul>
+                    </div>
+                    <div class="highlight-box" style="background: #ff6b6b;">
+                        <h3>🚫 Чего избегать</h3>
+                        <ul style="margin-top: 15px;">
+                            <li>Зависимости между тестами</li>
+                            <li>Тестирование тривиальных геттеров</li>
+                            <li>Слишком сложных тестов</li>
+                            <li>Игнорирования падающих тестов</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Project Structure -->
+        <div class="slide" data-slide="10">
+            <div class="slide-content">
+                <h2><span class="emoji">📁</span> Структура проекта</h2>
+                <div class="two-column">
+                    <div class="folder-structure">
+<span class="folder">my_project/</span>
+├── <span class="folder">src/</span>
+│   ├── __init__.py
+│   ├── <span class="file">math_ops.py</span>
+│   └── <span class="file">utils.py</span>
+├── <span class="folder">tests/</span>
+│   ├── __init__.py
+│   ├── <span class="file">conftest.py</span>        <span class="comment"># общие фикстуры</span>
+│   ├── <span class="file">test_math_ops.py</span>
+│   └── <span class="file">test_utils.py</span>
+├── <span class="file">pyproject.toml</span>
+├── <span class="file">setup.cfg</span>
+├── <span class="file">requirements.txt</span>
+└── <span class="file">requirements-dev.txt</span>
+                    </div>
+                    <div>
+                        <h3>📄 conftest.py</h3>
+                        <div class="code-block" style="font-size: 0.9rem;">
+<span class="keyword">import</span> pytest
+
+<span class="comment"># Фикстура доступна во всех тестах</span>
+@pytest.fixture
+<span class="keyword">def</span> <span class="function">sample_data</span>():
+    <span class="keyword">return</span> {<span class="string">"key"</span>: <span class="string">"value"</span>}
+
+<span class="comment"># Фикстура с областью session</span>
+@pytest.fixture(scope=<span class="string">"session"</span>)
+<span class="keyword">def</span> <span class="function">db_connection</span>():
+    db = create_test_db()
+    <span class="keyword">yield</span> db
+    db.close()
+                        </div>
+                        <div class="highlight-box" style="margin-top: 20px;">
+                            <h3>🎯 Принципы</h3>
+                            <ul style="margin-top: 10px;">
+                                <li>Тесты рядом с кодом</li>
+                                <li>Имена файлов: <code>test_*.py</code></li>
+                                <li>Общие фикстуры в <code>conftest.py</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Resources -->
+        <div class="slide" data-slide="11">
+            <div class="slide-content">
+                <h2><span class="emoji">📚</span> Полезные ресурсы</h2>
+                <div class="content-grid">
+                    <div>
+                        <h3>📖 Документация</h3>
+                        <ul>
+                            <li><a href="https://docs.pytest.org/" style="color: var(--primary);">docs.pytest.org</a> - официальная документация pytest</li>
+                            <li><a href="https://docs.python.org/3/library/unittest.html" style="color: var(--primary);">unittest.mock</a> - мокирование в Python</li>
+                            <li><a href="https://coverage.readthedocs.io/" style="color: var(--primary);">coverage.py</a> - измерение покрытия</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>📚 Книги и курсы</h3>
+                        <ul>
+                            <li><strong>"Python Testing with pytest"</strong> (Brian Okken)</li>
+                            <li><strong>"Test-Driven Development with Python"</strong> (Harry Percival)</li>
+                            <li>Real Python - tutorials по тестированию</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>🔌 Плагины pytest</h3>
+                        <ul>
+                            <li><code>pytest-xdist</code> - параллельный запуск</li>
+                            <li><code>pytest-asyncio</code> - async/await тесты</li>
+                            <li><code>pytest-mock</code> - удобные моки</li>
+                            <li><code>pytest-cov</code> - покрытие кода</li>
+                            <li><code>pytest-flask</code> / <code>pytest-django</code> - веб-фреймворки</li>
+                        </ul>
+                    </div>
+                    <div class="highlight-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <h3>🎓 Следующие шаги</h3>
+                        <ul style="margin-top: 15px;">
+                            <li>Интеграционное тестирование</li>
+                            <li>E2E тесты (Selenium, Playwright)</li>
+                            <li>CI/CD (GitHub Actions, GitLab CI)</li>
+                            <li>Property-based testing (Hypothesis)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Conclusion -->
+        <div class="slide" data-slide="12">
+            <div class="slide-content" style="text-align: center;">
+                <div class="icon">🎉</div>
+                <h1>Спасибо за внимание!</h1>
+                <p class="subtitle">Unit тестирование — ключ к качественному коду</p>
+                
+                <div style="margin: 40px 0; padding: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px; display: inline-block;">
+                    <h3 style="color: white; margin-bottom: 20px;">🚀 Начните прямо сейчас</h3>
+                    <div style="font-size: 1.3rem; line-height: 2;">
+                        <p><code>pip install pytest pytest-cov</code></p>
+                        <p><code>pytest --cov=your_module</code></p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 40px; font-size: 1.2rem; color: #666;">
+                    <p><strong>Вопросы?</strong></p>
+                    <p style="margin-top: 10px;">Практикуйтесь и пишите тесты! 💪</p>
+                </div>
+
+                <div style="margin-top: 40px; padding: 20px; background: #f0f0f0; border-radius: 10px; display: inline-block;">
+                    <p style="color: #666; font-size: 1rem;">
+                        <span class="emoji">🐍</span> Python + pytest = ❤️
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Назад</button>
+        <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Вперед →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const progressBar = document.getElementById('progressBar');
+        const slideNumber = document.getElementById('slideNumber');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active', 'prev');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                } else if (index < currentSlide) {
+                    slide.classList.add('prev');
+                }
+            });
+
+            // Update progress bar
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressBar.style.width = progress + '%';
+
+            // Update slide number
+            slideNumber.textContent = `${currentSlide + 1} / ${totalSlides}`;
+
+            // Update buttons
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+            nextBtn.textContent = currentSlide === totalSlides - 1 ? 'Финиш 🏁' : 'Вперед →';
+        }
+
+        function changeSlide(direction) {
+            const newSlide = currentSlide + direction;
+            if (newSlide >= 0 && newSlide < totalSlides) {
+                currentSlide = newSlide;
+                updateSlide();
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                changeSlide(1);
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                changeSlide(-1);
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                currentSlide = 0;
+                updateSlide();
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                currentSlide = totalSlides - 1;
+                updateSlide();
+            }
+        });
+
+        // Touch support for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                changeSlide(1);
+            }
+            if (touchEndX > touchStartX + 50) {
+                changeSlide(-1);
+            }
+        }
+
+        // Initialize
+        updateSlide();
+
+        // Auto-hide navigation after 3 seconds of inactivity
+        let hideTimeout;
+        const nav = document.querySelector('.navigation');
+        
+        function hideNav() {
+            nav.style.opacity = '0';
+            nav.style.transition = 'opacity 0.5s';
+        }
+        
+        function showNav() {
+            nav.style.opacity = '1';
+            clearTimeout(hideTimeout);
+            hideTimeout = setTimeout(hideNav, 3000);
+        }
+
+        document.addEventListener('mousemove', showNav);
+        document.addEventListener('click', showNav);
+        showNav();
+    </script>
+</body>
+</html>
